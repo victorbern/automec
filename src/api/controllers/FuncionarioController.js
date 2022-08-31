@@ -30,6 +30,23 @@ module.exports = {
         res.json(json);
     },
 
+    buscaPorValor: async(req, res) => {
+        let json = {error: '', result: []};
+        let valor = req.params.valor;
+        let funcionarios = await FuncionarioService.buscaPorValor(valor);
+
+        for (let i in funcionarios){
+            json.result.push({
+                idFuncionario: funcionarios[i].idFuncionario,
+                nomeFuncionario: funcionarios[i].nomeFuncionario,
+                isAtivo: funcionarios[i].isAtivo,
+                funcao: funcionarios[i].funcao
+            });
+        }
+
+        res.json(json);
+    },
+
     inserirFuncionario: async(req, res) => {
         let json = {error: '', result: {}};
         
@@ -67,6 +84,23 @@ module.exports = {
                 nomeFuncionario,
                 isAtivo,
                 funcao
+            };
+        } else {
+            json.error = "Campos não enviados";
+        }
+
+        res.json(json);
+    },
+
+    excluirFuncionario: async (req, res) => {
+        let json = {error: '', result: {}};
+
+        let id = req.params.id;
+
+        if(id){
+            await FuncionarioService.excluirFuncionario(id);
+            json.result = {
+                id
             };
         } else {
             json.error = "Campos não enviados";

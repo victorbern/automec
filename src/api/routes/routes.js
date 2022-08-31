@@ -8,26 +8,28 @@ const ProdutoController = require("../controllers/ProdutoController");
 const VeiculoController = require("../controllers/VeiculoController");
 
 // APIs para cliente
-router.get('/clientes', ClienteController.buscarTodos);
-router.get('/cliente/:id', ClienteController.buscarPorId);
-router.post('/cliente', ClienteController.inserirCliente);
-router.put('/cliente/:id', ClienteController.alterarCliente);
-router.delete('/cliente/:id', ClienteController.excluirCliente);
-router.get('/clientes/:valor', ClienteController.buscaInteligente);
+router.get('/clientes', ClienteController.buscarTodos); // Buscar todos os clientes
+router.get('/cliente/:id', ClienteController.buscarPorId); // Buscar cliente por id
+router.post('/cliente', ClienteController.inserirCliente); // Inserir novo cliente no banco de dados
+router.put('/cliente/:id', ClienteController.alterarCliente); // Alterar dados de um cliente
+router.delete('/cliente/:id', ClienteController.excluirCliente); // Deletar um cliente do banco de dados
+router.get('/clientes/:valor', ClienteController.buscaPorValor); // Buscar cliente por nome e/ou cpfCnpj
 
 // APIs para funcionários
-router.get('/funcionarios', FuncionarioController.buscarTodos);
-router.get('/funcionario/:id', FuncionarioController.buscarPorId);
-router.post('/funcionario', FuncionarioController.inserirFuncionario);
-router.put('/funcionario/:id', FuncionarioController.alterarFuncionario);
-// router.delete('/cliente/:id', ClienteController.excluirCliente);
+router.get('/funcionarios', FuncionarioController.buscarTodos); // Buscar todos os funcionários
+router.get('/funcionario/:id', FuncionarioController.buscarPorId); // Buscar funcionário por id
+router.post('/funcionario', FuncionarioController.inserirFuncionario); // Inserir novo funcionário no banco de dados
+router.put('/funcionario/:id', FuncionarioController.alterarFuncionario); // Alterar dados de um funcionário
+router.delete('/funcionario/:id', FuncionarioController.excluirFuncionario); // Deletar um funcionario do banco de dados
+router.get('/funcionarios/:valor', FuncionarioController.buscaPorValor); // Buscar funcionario por nomeFuncionario e funcao
 
 // APIs para produtos
 router.get('/produtos', ProdutoController.buscarTodos);
 router.get('/produto/:id', ProdutoController.buscarPorId);
 router.post('/produto', ProdutoController.inserirProduto);
 router.put('/produto/:id', ProdutoController.alterarProduto);
-// router.delete('/cliente/:id', ClienteController.excluirCliente);
+router.put('/alterar-estoque/:id', ProdutoController.alterarEstoque);
+router.delete('/produto/:id', ProdutoController.excluirProduto);
 
 // APIs para veículos
 router.get('/veiculos', VeiculoController.buscarTodos);

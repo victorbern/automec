@@ -36,14 +36,14 @@ module.exports = {
         res.json(json);
     },
 
-    buscaInteligente: async(req, res) => {
+    buscaPorValor: async(req, res) => {
         let json = {error: '', result: []};
         let valor = req.params.valor;
-        let clientes = await ClienteService.buscaInteligente(valor);
+        let clientes = await ClienteService.buscaPorValor(valor);
 
         for (let i in clientes){
             json.result.push({
-                id: clientes[i].id,
+                idCliente: clientes[i].idCliente,
                 nomeCliente: clientes[i].nomeCliente,
                 cpfCnpj: clientes[i].cpfCnpj,
                 celularCliente: clientes[i].celularCliente,
@@ -138,8 +138,7 @@ module.exports = {
         if(id){
             await ClienteService.excluirCliente(id);
             json.result = {
-                id,
-                isAtivo: false
+                id
             };
         } else {
             json.error = "Campos não enviados";

@@ -34,6 +34,29 @@ module.exports = {
         });
     },
 
+    getQuantidade: (id) => {
+        return new Promise((aceito, recusado) => {
+            db.query('SELECT quantidade FROM Produto WHERE id = ?', [id], (error, results) => {
+                if(error) {rejeitado(error); return;}
+                aceito(results)
+            });
+        });
+    },
+
+    alterarEstoque: (id, valorAlteracao) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('UPDATE produto SET quantidade = quantidade+? WHERE idProduto = ?', [valorAlteracao, id], (error, results) => {
+                if(error) { rejeitado(error); return; }
+
+                db.query('SELECT quantidade FROM Produto WHERE idProduto = ?', [id], (error, resultSelect) => {
+                    if(error) { rejeitado(error); return; }
+                    aceito(resultSelect);
+                });
+                aceito(results);
+            })
+        });
+    },
+
     alterarProduto: (idProduto, codigoBarras, descricao, valorCusto, quantidade, precoVenda) => {
         return new Promise((aceito, rejeitado) => {
             db.query('UPDATE produto SET codigoBarras = ?, descricao = ?, valorCusto = ?,' +
@@ -41,6 +64,15 @@ module.exports = {
                 [codigoBarras, descricao, valorCusto, quantidade, precoVenda, idProduto], (error, results) => {
                     if(error) {rejeitado(error); return; }
                     aceito(results);
+            });
+        });
+    },
+
+    excluirProduto: (id) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('DELETE FROM Produto WHERE idProduto = ?', [id], (error, results) => {
+                if (error) { rejeitado(error); return; }
+                aceito(results);
             });
         });
     }

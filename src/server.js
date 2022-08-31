@@ -2,7 +2,8 @@ require('dotenv').config({path:"variaveis.env"});
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
+let dados = require('./database')
+// dados.inserirDados();
 const app = express();
 
 const routes = require("./api/routes/routes");

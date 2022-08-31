@@ -4,7 +4,7 @@ module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
             db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
-            'cidade, uf, complemento FROM Cliente WHERE isAtivo = true', (error, results) => {
+            'cidade, uf, complemento FROM Cliente', (error, results) => {
                 if (error) { rejeitado(error); return; }
                 aceito(results);
             });
@@ -14,7 +14,7 @@ module.exports = {
     buscarPorId: (id) => {
         return new Promise((aceito, rejeitado) => {
             db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
-            'cidade, uf, complemento FROM Cliente WHERE Cliente.idCliente = ? WHERE isAtivo = true', [id], (error, results) => {
+            'cidade, uf, complemento FROM Cliente WHERE Cliente.idCliente = ?', [id], (error, results) => {
                 if (error) { rejeitado(error); return; }
                 if (results.length > 0) {
                     aceito(results);
@@ -25,7 +25,7 @@ module.exports = {
         });
     },
 
-    buscaInteligente: (valor) => {
+    buscaPorValor: (valor) => {
         valor = "%"+valor+"%";
         return new Promise((aceito, rejeitado) => {
             db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
@@ -69,7 +69,7 @@ module.exports = {
 
     excluirCliente: (id) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('UPDATE Cliente SET isAtivo = false WHERE idCliente = ?', [id], (error, results) => {
+            db.query('DELETE FROM Cliente WHERE idCliente = ?', [id], (error, results) => {
                 if (error) { rejeitado(error); return; }
                 aceito(results);
             });

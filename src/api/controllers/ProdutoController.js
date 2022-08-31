@@ -58,6 +58,22 @@ module.exports = {
         res.json(json);
     },
 
+    alterarEstoque: async(req, res) => {
+        let json = {error: '', result: {}};
+
+        let id = req.params.id;
+        let valorAlteracao = req.body.valorAlteracao;
+
+        let quantidade = await ProdutoService.alterarEstoque(id, valorAlteracao);
+
+        json.result = {
+            idProduto: id,
+            quantidade: quantidade
+        }
+
+        res.json(json);
+    },
+
     alterarProduto: async(req, res) => {
         let json = {error: '', result: {}};
 
@@ -77,6 +93,23 @@ module.exports = {
                 valorCusto,
                 quantidade,
                 precoVenda,
+            };
+        } else {
+            json.error = "Campos não enviados";
+        }
+
+        res.json(json);
+    },
+
+    excluirProduto: async (req, res) => {
+        let json = {error: '', result: {}};
+
+        let id = req.params.id;
+
+        if(id){
+            await ProdutoService.excluirProduto(id);
+            json.result = {
+                id
             };
         } else {
             json.error = "Campos não enviados";
