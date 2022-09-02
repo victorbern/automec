@@ -37,7 +37,8 @@ router.get('/veiculo/:placa', VeiculoController.buscarPorPlaca);
 router.post('/veiculo', VeiculoController.inserirVeiculo);
 router.put('/veiculo/:placa', VeiculoController.alterarVeiculo);
 router.get('/veiculo-por-cliente/:idCliente', VeiculoController.buscarPorCliente);
-// router.delete('/cliente/:id', ClienteController.excluirCliente);
+router.delete('/veiculo/:placa', VeiculoController.excluirVeiculo);
+router.get('/veiculos/:valor', VeiculoController.buscaPorValor);
 
 // APIs para Serviços
 // router.get('/clientes', ClienteController.buscarTodos);

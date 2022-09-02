@@ -33,6 +33,26 @@ module.exports = {
         res.json(json);
     },
 
+    buscaPorValor: async(req, res) => {
+        let json = {error: '', result: []};
+        let valor = req.params.valor;
+        let veiculos = await VeiculoService.buscaPorValor(valor);
+
+        for (let i in veiculos){
+            json.result.push({
+                placaVeiculo: veiculos[i].placaVeiculo,
+                marca: veiculos[i].marca,
+                modelo: veiculos[i].modelo,
+                ano: veiculos[i].ano,
+                capacidadeOleo: veiculos[i].capacidadeOleo,
+                cor: veiculos[i].cor,
+                veiculo_idCliente: veiculos[i].veiculo_idCliente
+            });
+        }
+        
+        res.json(json);
+    },
+
     inserirVeiculo: async(req, res) => {
         let json = {error: '', result: {}};
         
@@ -112,5 +132,22 @@ module.exports = {
         
         res.json(json);
     },
+
+    excluirVeiculo: async (req, res) => {
+        let json = {error: '', result: {}};
+
+        let placaVeiculo = req.params.placa;
+
+        if(placaVeiculo){
+            await VeiculoService.excluirVeiculo(placaVeiculo);
+            json.result = {
+                placaVeiculo: placaVeiculo
+            };
+        } else {
+            json.error = "Campos não enviados";
+        }
+
+        res.json(json);
+    }
 
 }
