@@ -3,10 +3,31 @@ const db = require("../../db");
 module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
-            'cidade, uf, complemento FROM Cliente', (error, results) => {
+            db.query(`SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
+            'cidade, uf, complemento FROM Cliente`, (error, results) => {
                 if (error) { rejeitado(error); return; }
                 aceito(results);
+            });
+        });
+    },
+
+    // Buscar todos com limite de dados
+    buscarTodos: (inicio, qtdClientes) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query(`SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
+            'cidade, uf, complemento FROM Cliente LIMIT ?, ?`, [inicio, qtdClientes], (error, results) => {
+                if (error) { rejeitado(error); return; }
+                results.push()
+                aceito(results);
+            });
+        });
+    },
+
+    buscarTotalClientes: () => {
+        return new Promise((aceito, recusado) => {
+            db.query(`SELECT COUNT(idCliente) AS totalClientes FROM Cliente`, (error, results) => {
+                if(error) { rejeitado(error); return; }
+                aceito(results[0].totalClientes);
             });
         });
     },

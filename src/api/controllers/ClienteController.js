@@ -3,12 +3,21 @@ const ClienteService = require("../services/ClienteService");
 
 module.exports = {
     buscarTodos: async(req, res) => {
-        let json = {error: '', result: []};
-        let clientes = await ClienteService.buscarTodos();
-
+        let json = {error: '', result: {clientes: [], totalClientes: []}};
+        let paginaAtual = req.query.paginaAtual;
+        let qtdClientes = req.query.qtdClientes;
+        let clientes;
+        if (paginaAtual && qtdClientes){
+            let inicio = (paginaAtual-1)*qtdClientes;
+            qtdClientes = qtdClientes*1;
+            clientes = await ClienteService.buscarTodos(inicio, qtdClientes);
+        } else {
+            clientes = await ClienteService.buscarTodos(1, 10);
+        }
+        let totalClientes = await ClienteService.buscarTotalClientes();
         for (let i in clientes){
-            json.result.push({
-                id: clientes[i].id,
+            json.result.clientes.push({
+                idCliente: clientes[i].idCliente,
                 nomeCliente: clientes[i].nomeCliente,
                 cpfCnpj: clientes[i].cpfCnpj,
                 celularCliente: clientes[i].celularCliente,
@@ -20,7 +29,8 @@ module.exports = {
                 complemento: clientes[i].complemento
             });
         }
-        
+        json.result.totalClientes = totalClientes;
+        console.log(json.result);
         res.json(json);
     },
 
