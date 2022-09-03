@@ -32,6 +32,16 @@ module.exports = {
         });
     },
 
+    buscarTotalClientesPorValor: (valor) => {
+        valor = "%"+valor+"%";
+        return new Promise((aceito, recusado) => {
+            db.query(`SELECT COUNT(idCliente) AS totalClientes FROM Cliente WHERE nomeCliente like ? OR cpfCnpj like ?`, [valor, valor], (error, results) => {
+                if(error) { rejeitado(error); return; }
+                aceito(results[0].totalClientes);
+            });
+        });
+    },
+
     buscarPorId: (id) => {
         return new Promise((aceito, rejeitado) => {
             db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
@@ -46,11 +56,11 @@ module.exports = {
         });
     },
 
-    buscaPorValor: (valor) => {
+    buscaPorValor: (valor, inicio, qtdClientes) => {
         valor = "%"+valor+"%";
         return new Promise((aceito, rejeitado) => {
             db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
-            'cidade, uf, complemento FROM Cliente WHERE nomeCliente like ? OR cpfCnpj like ?', [valor, valor], 
+            'cidade, uf, complemento FROM Cliente WHERE nomeCliente like ? OR cpfCnpj like ? LIMIT ?, ?', [valor, valor, inicio, qtdClientes], 
             (error, results) => {
                 if (error) { rejeitado(error); return; }
                 if (results.length > 0){

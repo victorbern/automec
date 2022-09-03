@@ -12,7 +12,7 @@ module.exports = {
             qtdClientes = qtdClientes*1;
             clientes = await ClienteService.buscarTodos(inicio, qtdClientes);
         } else {
-            clientes = await ClienteService.buscarTodos(1, 10);
+            clientes = await ClienteService.buscarTodos(0, 10);
         }
         let totalClientes = await ClienteService.buscarTotalClientes();
         for (let i in clientes){
@@ -47,12 +47,24 @@ module.exports = {
     },
 
     buscaPorValor: async(req, res) => {
-        let json = {error: '', result: []};
+        let json = {error: '', result: {clientes: [], totalClientes: {}}};
         let valor = req.params.valor;
-        let clientes = await ClienteService.buscaPorValor(valor);
+        
+        let paginaAtual = req.query.paginaAtual;
+        let qtdClientes = req.query.qtdClientes;
+
+        let clientes;
+        if (paginaAtual && qtdClientes){
+            let inicio = (paginaAtual-1)*qtdClientes;
+            qtdClientes = qtdClientes*1;
+            clientes = await ClienteService.buscaPorValor(valor, inicio, qtdClientes);
+        } else {
+            clientes = await ClienteService.buscaPorValor(valor, 0, 10);
+        }
+        let totalClientes = await ClienteService.buscarTotalClientesPorValor(valor);
 
         for (let i in clientes){
-            json.result.push({
+            json.result.clientes.push({
                 idCliente: clientes[i].idCliente,
                 nomeCliente: clientes[i].nomeCliente,
                 cpfCnpj: clientes[i].cpfCnpj,
@@ -65,7 +77,7 @@ module.exports = {
                 complemento: clientes[i].complemento
             });
         }
-        
+        json.result.totalClientes = totalClientes;
         res.json(json);
     },
 
