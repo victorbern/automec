@@ -51,7 +51,7 @@ router.get('/veiculos/:valor', VeiculoController.buscaPorValor);
 // APIs para ordens de serviço
 router.get('/ordens-servico', OrdemServicoController.buscarTodos);
 router.get('/ordem-servico/:id', OrdemServicoController.buscarPorId);
-// router.post('/cliente', ClienteController.inserirCliente);
+router.post('/ordem-servico', OrdemServicoController.inserirOrdemServico);
 router.put('/ordem-servico/:id', OrdemServicoController.alterarOrdemServico);
 // router.delete('/cliente/:id', ClienteController.excluirCliente);
 

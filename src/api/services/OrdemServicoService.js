@@ -23,12 +23,10 @@ module.exports = {
         });
     },
 
-    inserirCliente: (nomeCliente, cpfCnpj, celularCliente, cep, 
-        endereco, numero, cidade, uf, complemento) => {
+    inserirOrdemServico: (idCliente, placaVeiculo, total, km) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(`INSERT INTO cliente (nomeCliente, cpfCnpj, celularCliente, cep,` +
-                `endereco, numero, cidade, uf, complemento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
-                [nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, cidade, uf, complemento],
+            db.query(`INSERT INTO OrdemServico (idCliente, placaVeiculo, total, km) VALUES (?, ?, ?, ?)`, 
+                [idCliente, placaVeiculo, total, km],
             (error, results) => {
                 if(error) {rejeitado(error); return; }
                 aceito(results.insertId);
@@ -44,6 +42,39 @@ module.exports = {
                 [dataOrdemServico, total, km, isFinalizada, isPaga, os_idCliente, idOrdemServico], (error, results) => {
                     if(error) {rejeitado(error); return; }
                     aceito(results);
+            });
+        });
+    },
+
+    inserirOSDetalhes: (idOrdemServico) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query(`INSERT INTO OSDetalhes (idOrdemServico) VALUES (?)`, 
+                [idOrdemServico],
+            (error, results) => {
+                if(error) {rejeitado(error); return; }
+                aceito(results.insertId);
+            });
+        });
+    },
+
+    inserirProdutoHasOSDetalhes: (idProduto, idOSDetalhes) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query(`INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes) VALUES (?, ?)`, 
+                [idProduto, idOSDetalhes],
+            (error, results) => {
+                if(error) {rejeitado(error); return; }
+                aceito(results);
+            });
+        });
+    },
+
+    inserirExecutaFuncao: (idServico, idFuncionario, observacao, idOSDetalhes) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query(`INSERT INTO ExecutaFuncao (idServico, idFuncionario, observacao, idOSDetalhes) VALUES (?, ?, ?, ?)`, 
+                [idServico, idFuncionario, observacao, idOSDetalhes],
+            (error, results) => {
+                if(error) {rejeitado(error); return; }
+                aceito(results);
             });
         });
     }

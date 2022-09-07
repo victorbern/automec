@@ -1,6 +1,8 @@
 const { json } = require("body-parser");
 const ClienteService = require("../services/ClienteService");
 const OrdemServicoService = require("../services/OrdemServicoService");
+const qs = require("qs");
+const ProdutoService = require("../services/ProdutoService");
 
 module.exports = {
     buscarTodos: async(req, res) => {
@@ -34,38 +36,42 @@ module.exports = {
         res.json(json);
     },
 
-    inserirCliente: async(req, res) => {
-        let json = {error: '', result: {}};
+    inserirOrdemServico: async(req, res) => {
+        let json = {error: '', result: ''};
         
-        let nomeCliente = req.body.nomeCliente;
-        let cpfCnpj = req.body.cpfCnpj;
-        let celularCliente = req.body.celularCliente;
-        let cep = req.body.cep;
-        let endereco = req.body.endereco;
-        let numero = req.body.numero;
-        let cidade = req.body.cidade;
-        let uf = req.body.uf;
-        let complemento = req.body.complemento;
-
-        if(nomeCliente && celularCliente && cpfCnpj){
-            let IdCliente = await ClienteService.inserirCliente(nomeCliente, cpfCnpj, celularCliente, cep, 
-                            endereco, numero, cidade, uf, complemento);
-            json.result = {
-                id: IdCliente,
-                nomeCliente,
-                cpfCnpj,
-                celularCliente,
-                cep,
-                endereco,
-                numero,
-                cidade,
-                uf,
-                complemento
-            };
+        let valores = req.body;
+        valores = qs.parse(valores);
+        
+        let idCliente = valores.idCliente;
+        let placaVeiculo = valores.placaVeiculo;
+        let total = valores.total;
+        let km = valores.km
+        if(idCliente && placaVeiculo){
+            let idOrdemServico = await OrdemServicoService.inserirOrdemServico(idCliente, placaVeiculo, total, km);
+            if (idOrdemServico){
+                let idOSDetalhes = await OrdemServicoService.inserirOSDetalhes(idOrdemServico);
+                if (valores.produtos) {
+                    for (let i in valores.produtos){
+                        let idProduto = valores.produtos[i].idProduto*1;
+                        let quantidade = valores.produtos[i].quantidade*1;
+                        
+                        await OrdemServicoService.inserirProdutoHasOSDetalhes(idProduto, idOSDetalhes);
+                        await ProdutoService.alterarEstoque(quantidade*-1);
+                    }
+                }
+                if (valores.servicos) {
+                    for (let i in valores.servicos){
+                        let idServico = valores.servicos[i].idServico;
+                        let idFuncionario = valores.servicos[i].idFuncionario;
+                        let observacao = valores.servicos[i].observacao;
+                        await OrdemServicoService.inserirExecutaFuncao(idServico, idFuncionario, observacao, idOSDetalhes);
+                    }
+                }
+            }
+            json.result = "Dados enviados";
         } else {
             json.error = "Campos não enviados";
         }
-
         res.json(json);
     },
 

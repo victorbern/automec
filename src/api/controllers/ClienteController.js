@@ -3,20 +3,11 @@ const ClienteService = require("../services/ClienteService");
 
 module.exports = {
     buscarTodos: async(req, res) => {
-        let json = {error: '', result: {clientes: [], totalClientes: []}};
-        let paginaAtual = req.query.paginaAtual;
-        let qtdClientes = req.query.qtdClientes;
-        let clientes;
-        if (paginaAtual && qtdClientes){
-            let inicio = (paginaAtual-1)*qtdClientes;
-            qtdClientes = qtdClientes*1;
-            clientes = await ClienteService.buscarTodos(inicio, qtdClientes);
-        } else {
-            clientes = await ClienteService.buscarTodos(0, 10);
-        }
-        let totalClientes = await ClienteService.buscarTotalClientes();
+        let json = {error: '', result: []};
+        let clientes = await ClienteService.buscarTodos();
+
         for (let i in clientes){
-            json.result.clientes.push({
+            json.result.push({
                 idCliente: clientes[i].idCliente,
                 nomeCliente: clientes[i].nomeCliente,
                 cpfCnpj: clientes[i].cpfCnpj,
@@ -29,8 +20,7 @@ module.exports = {
                 complemento: clientes[i].complemento
             });
         }
-        json.result.totalClientes = totalClientes;
-        console.log(json.result);
+        
         res.json(json);
     },
 
@@ -47,24 +37,12 @@ module.exports = {
     },
 
     buscaPorValor: async(req, res) => {
-        let json = {error: '', result: {clientes: [], totalClientes: {}}};
+        let json = {error: '', result: []};
         let valor = req.params.valor;
-        
-        let paginaAtual = req.query.paginaAtual;
-        let qtdClientes = req.query.qtdClientes;
-
-        let clientes;
-        if (paginaAtual && qtdClientes){
-            let inicio = (paginaAtual-1)*qtdClientes;
-            qtdClientes = qtdClientes*1;
-            clientes = await ClienteService.buscaPorValor(valor, inicio, qtdClientes);
-        } else {
-            clientes = await ClienteService.buscaPorValor(valor, 0, 10);
-        }
-        let totalClientes = await ClienteService.buscarTotalClientesPorValor(valor);
+        let clientes = await ClienteService.buscaPorValor(valor);
 
         for (let i in clientes){
-            json.result.clientes.push({
+            json.result.push({
                 idCliente: clientes[i].idCliente,
                 nomeCliente: clientes[i].nomeCliente,
                 cpfCnpj: clientes[i].cpfCnpj,
@@ -77,7 +55,7 @@ module.exports = {
                 complemento: clientes[i].complemento
             });
         }
-        json.result.totalClientes = totalClientes;
+        
         res.json(json);
     },
 
