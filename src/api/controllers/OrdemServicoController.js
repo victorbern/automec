@@ -164,17 +164,6 @@ module.exports = {
         res.json(json);
     },
 
-    // adicionarOSJson: (json, todasOrdens) => {
-    //     for (let i in todasOrdens) {
-    //         for (let j in json) {
-    //             if (todasOrdens[i].idOrdemServico == json.result[j].idOrdemServico) {
-    //                 delete todasOrdens[i];
-    //             }
-    //         }
-    //     }
-    //     return json;
-    // },
-
     inserirOrdemServico: async(req, res) => {
         let json = {error: '', result: ''};
         
