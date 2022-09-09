@@ -11,8 +11,9 @@ module.exports = {
     },
 
     buscarPorPlaca: (placa) => {
+        placa = "%"+placa+"%";
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT * FROM veiculo WHERE veiculo.placaVeiculo = ?', [placa], (error, results) => {
+            db.query('SELECT * FROM Veiculo WHERE placaVeiculo like ?', [placa], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 if(results.length > 0){
                     aceito(results);

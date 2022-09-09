@@ -12,10 +12,38 @@ module.exports = {
 
     buscarPorId: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT * FROM OrdemServico WHERE OrdemServico.idCliente = ?', [idOrdemServico], (error, results) => {
+            db.query('SELECT * FROM OrdemServico WHERE idOrdemServico = ?', [idOrdemServico], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 if(results.length > 0){
-                    aceito(results);
+                    aceito(results[0]);
+                } else {
+                    aceito(false);
+                }
+            });
+        });
+    },
+
+    buscaPorIdCliente: (idCliente) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('SELECT * FROM OrdemServico WHERE idCliente = ?', [idCliente], 
+            (error, results) => {
+                if (error) { rejeitado(error); return; }
+                if (results.length > 0){
+                    aceito(results[0]);
+                } else {
+                    aceito(false);
+                }
+            });
+        });
+    },
+
+    buscaPorPlacaVeiculo: (placaVeiculo) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('SELECT * FROM OrdemServico WHERE placaVeiculo like ?', [placaVeiculo], 
+            (error, results) => {
+                if (error) { rejeitado(error); return; }
+                if (results.length > 0){
+                    aceito(results[0]);
                 } else {
                     aceito(false);
                 }
@@ -48,7 +76,7 @@ module.exports = {
 
     inserirOSDetalhes: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(`INSERT INTO OSDetalhes (idOrdemServico) VALUES (?)`, 
+            db.query(`INSERT INTO OSDetalhes (idOrdemServico, dataOS) VALUES (?, CURDATE())`, 
                 [idOrdemServico],
             (error, results) => {
                 if(error) {rejeitado(error); return; }
@@ -59,10 +87,10 @@ module.exports = {
 
     buscarOSDetalhes: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT idOSDetalhes, data FROM OSDetalhes WHERE idOrdemServico = ?', [idOrdemServico], (error, results) => {
+            db.query('SELECT idOSDetalhes, dataOS FROM OSDetalhes WHERE idOrdemServico = ?', [idOrdemServico], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 if(results.length > 0){
-                    aceito(results);
+                    aceito(results[0]);
                 } else {
                     aceito(false);
                 }

@@ -25,6 +25,22 @@ module.exports = {
         });
     },
 
+    buscarPorNomeCliente: (nomeCliente) => {
+        nomeCliente = "%"+nomeCliente+"%";
+        return new Promise((aceito, rejeitado) => {
+            db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
+            'cidade, uf, complemento FROM Cliente WHERE nomeCliente like ?', [nomeCliente], 
+            (error, results) => {
+                if (error) { rejeitado(error); return; }
+                if (results.length > 0){
+                    aceito(results);
+                } else {
+                    aceito(false);
+                }
+            });
+        });
+    },
+
     buscaPorValor: (valor) => {
         valor = "%"+valor+"%";
         return new Promise((aceito, rejeitado) => {

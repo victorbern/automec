@@ -5,6 +5,7 @@ const ClienteController = require("../controllers/ClienteController");
 const FuncionarioController = require("../controllers/FuncionarioController");
 const OrdemServicoController = require("../controllers/OrdemServicoController");
 const ProdutoController = require("../controllers/ProdutoController");
+const ServicoController = require("../controllers/ServicoController");
 const VeiculoController = require("../controllers/VeiculoController");
 
 // APIs para cliente
@@ -41,12 +42,12 @@ router.delete('/veiculo/:placa', VeiculoController.excluirVeiculo);
 router.get('/veiculos/:valor', VeiculoController.buscaPorValor);
 
 // APIs para Serviços
-// router.get('/clientes', ClienteController.buscarTodos);
-// router.get('/cliente/:id', ClienteController.buscarPorId);
-// router.post('/cliente', ClienteController.inserirCliente);
-// router.put('/cliente/:id', ClienteController.alterarCliente);
-// router.delete('/cliente/:id', ClienteController.excluirCliente);
-
+router.get('/servicos', ServicoController.buscarTodos);
+router.get('/servico/:id', ServicoController.buscarPorId);
+router.post('/servico', ServicoController.inserirServico);
+router.put('/servico/:id', ServicoController.alterarServico);
+router.delete('/servico/:id', ServicoController.excluirServico);
+router.get('/servicos/:valor', ServicoController.buscaPorValor); // Buscar servico por idServico e/ou descricao
 
 // APIs para ordens de serviço
 router.get('/ordens-servico', OrdemServicoController.buscarTodos);
@@ -54,5 +55,6 @@ router.get('/ordem-servico/:id', OrdemServicoController.buscarPorId);
 router.post('/ordem-servico', OrdemServicoController.inserirOrdemServico);
 router.put('/ordem-servico/:id', OrdemServicoController.alterarOrdemServico);
 // router.delete('/cliente/:id', ClienteController.excluirCliente);
+router.get('/ordens-servico/:valor', OrdemServicoController.buscaPorValor); // Buscar cliente por nome e/ou cpfCnpj
 
 module.exports = router;
