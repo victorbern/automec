@@ -46,7 +46,9 @@ module.exports = {
                 ano: veiculos[i].ano,
                 capacidadeOleo: veiculos[i].capacidadeOleo,
                 cor: veiculos[i].cor,
-                veiculo_idCliente: veiculos[i].veiculo_idCliente
+                veiculo_idCliente: veiculos[i].veiculo_idCliente,
+                nomeCliente: veiculos[i].nomeCliente,
+                celularCliente: veiculos[i].celularCliente
             });
         }
         

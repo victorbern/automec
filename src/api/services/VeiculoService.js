@@ -27,8 +27,9 @@ module.exports = {
     buscaPorValor: (valor) => {
         valor = "%"+valor+"%";
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT placaVeiculo, marca, modelo, ano, capacidadeOleo, cor,' +
-            'idCliente FROM Veiculo WHERE placaVeiculo like ? OR marca like ? OR modelo like ?', 
+            db.query(`SELECT v.placaVeiculo, v.marca, v.modelo, v.ano, v.capacidadeOleo, v.cor,
+            v.idCliente, c.nomeCliente, c.celularCliente FROM Veiculo AS v INNER JOIN Cliente AS c ON v.idCliente = c.idCliente
+            WHERE v.placaVeiculo like ? OR v.marca like ? OR v.modelo like ?`, 
             [valor, valor, valor], (error, results) => {
                 if (error) { rejeitado(error); return; }
                 if (results.length > 0){

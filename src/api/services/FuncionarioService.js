@@ -15,7 +15,7 @@ module.exports = {
             db.query('SELECT * FROM funcionario WHERE funcionario.idFuncionario = ?', [id], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 if(results.length > 0){
-                    aceito(results);
+                    aceito(results[0]);
                 } else {
                     aceito(false);
                 }
