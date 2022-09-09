@@ -57,13 +57,39 @@ module.exports = {
         });
     },
 
-    inserirProdutoHasOSDetalhes: (idProduto, idOSDetalhes) => {
+    buscarOSDetalhes: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(`INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes) VALUES (?, ?)`, 
-                [idProduto, idOSDetalhes],
+            db.query('SELECT idOSDetalhes, data FROM OSDetalhes WHERE idOrdemServico = ?', [idOrdemServico], (error, results) => {
+                if(error) {rejeitado(error); return; }
+                if(results.length > 0){
+                    aceito(results);
+                } else {
+                    aceito(false);
+                }
+            });
+        });
+    },
+
+    inserirProdutoHasOSDetalhes: (idProduto, idOSDetalhes, quantidade, precoUnitario) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query(`INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes, quantidade, precoUnitario) VALUES (?, ?, ?, ?)`, 
+                [idProduto, idOSDetalhes, quantidade, precoUnitario],
             (error, results) => {
                 if(error) {rejeitado(error); return; }
                 aceito(results);
+            });
+        });
+    },
+
+    buscarProdutoOSDetalhes: (idOSDetalhes) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('SELECT idProduto, quantidade, precoUnitario FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?', [idOSDetalhes], (error, results) => {
+                if(error) {rejeitado(error); return; }
+                if(results.length > 0){
+                    aceito(results);
+                } else {
+                    aceito(false);
+                }
             });
         });
     },
@@ -75,6 +101,19 @@ module.exports = {
             (error, results) => {
                 if(error) {rejeitado(error); return; }
                 aceito(results);
+            });
+        });
+    },
+
+    buscarExecutaFuncao: (idOSDetalhes) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('SELECT idFuncionario, idServico, observacao FROM ExecutaFuncao WHERE idOSDetalhes = ?', [idOSDetalhes], (error, results) => {
+                if(error) {rejeitado(error); return; }
+                if(results.length > 0){
+                    aceito(results);
+                } else {
+                    aceito(false);
+                }
             });
         });
     }

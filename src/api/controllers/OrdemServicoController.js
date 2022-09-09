@@ -3,22 +3,51 @@ const ClienteService = require("../services/ClienteService");
 const OrdemServicoService = require("../services/OrdemServicoService");
 const qs = require("qs");
 const ProdutoService = require("../services/ProdutoService");
+const VeiculoService = require("../services/VeiculoService");
 
 module.exports = {
     buscarTodos: async(req, res) => {
         let json = {error: '', result: []};
         let ordens = await OrdemServicoService.buscarTodos();
 
-        for (let i in ordens){
-            json.result.push({
-                idOrdemServico: ordens[i].idOrdemServico,
-                dataOrdemServico: ordens[i].dataOrdemServico,
-                total: ordens[i].total,
-                km: ordens[i].km,
-                isFinalizada: ordens[i].isFinalizada,
-                isPaga: ordens[i].isPaga,
-                os_idCliente: ordens[i].idCliente
-            });
+        if (ordens) {
+            for (let i in ordens) {
+                let cliente = await ClienteService.buscarPorId(ordens[i].idCliente);
+                let veiculo = await VeiculoService.buscarPorPlaca(ordens[i].placaVeiculo);
+                let osDetalhes = await OrdemServicoService.buscarOSDetalhes(ordens[i].idOrdemServico);
+                let vendas = await OrdemServicoService.buscarProdutoOSDetalhes(osDetalhes.idOSDetalhes);
+                let produtos = []
+                if (vendas) {
+                    for (let i in vendas) {
+                        let produto = await ProdutoService.buscarPorId(vendas[i].idProduto);
+                        let quantidadeVendida = vendas[i].quantidade;
+                        let precoUnitario = vendas[i].precoUnitario;
+                        let precoTotal = precoUnitario*quantidade;
+                        produtos.push({idProduto: vendas[i].idProduto, codigoBarras: produto.codigoBarras, descricao: produto.descricao, quantidadeVendida: quantidadeVendida, precoTotal: precoTotal});
+                    }
+                }
+                let executaFuncao = await OrdemServicoService.buscarExecutaFuncao();
+                let servicos = []
+                if (executaFuncao) {
+                    for (let i in executaFuncao) {
+                        // let servico = await ServicoService.buscarPorId(executaFuncao[i].idServico);
+                        let funcionario = await FuncionarioService.buscarPorId(executaFuncao[i].idFuncionario);
+                        servicos.push({idServico: executaFuncao[i].idServico, descricaoServico: servicos.descricaoServico, precoServico: servico.precoServico, observacao: executaFuncao.observacao, idFuncionario: funcionario.idFuncionario, nomeFuncionario: funcionario.nomeFuncionario});
+                    }
+                }
+                json.result.push({
+                    idOrdemServico: ordens[i].idOrdemServico,
+                    total: ordens[i].total,
+                    km: ordens[i].total,
+                    isFinalizada: ordens[i].isFinalizada,
+                    isPaga: ordens[i].isPaga,
+                    cliente: cliente,
+                    veiculo: veiculo,
+                    data: osDetalhes.data,
+                    produtos: produtos,
+                    servicos: servicos
+                })
+            }
         }
         
         res.json(json);
@@ -53,10 +82,10 @@ module.exports = {
                 if (valores.produtos) {
                     for (let i in valores.produtos){
                         let idProduto = valores.produtos[i].idProduto*1;
-                        let quantidade = valores.produtos[i].quantidade*1;
-                        
-                        await OrdemServicoService.inserirProdutoHasOSDetalhes(idProduto, idOSDetalhes);
-                        await ProdutoService.alterarEstoque(quantidade*-1);
+                        let quantidade = valores.produtos[i].quantidade*-1;
+                        let precoUnitario = valores.produtos[i].precoUnitario*1;
+                        await OrdemServicoService.inserirProdutoHasOSDetalhes(idProduto, idOSDetalhes, quantidade, precoUnitario);
+                        await ProdutoService.alterarEstoque(idProduto, quantidade);
                     }
                 }
                 if (valores.servicos) {
