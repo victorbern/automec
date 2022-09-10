@@ -14,7 +14,9 @@ module.exports = {
                 ano: veiculos[i].ano,
                 capacidadeOleo: veiculos[i].capacidadeOleo,
                 cor: veiculos[i].cor,
-                veiculo_idCliente: veiculos[i].idCliente
+                veiculo_idCliente: veiculos[i].idCliente,
+                nomeCliente: veiculos[i].nomeCliente,
+                celularCliente: veiculos[i].celularCliente
             });
         }
         
@@ -22,12 +24,22 @@ module.exports = {
     },
 
     buscarPorPlaca: async(req, res) => {
-        let json = {error: '', result: {}};
+        let json = {error: '', result: []};
         let placa = req.params.placa;
-        let veiculo = await VeiculoService.buscarPorPlaca(placa);
+        let veiculos = await VeiculoService.buscarPorPlaca(placa);
 
-        if(veiculo){
-            json.result = veiculo;
+        for(let i in veiculos){
+            json.result.push({
+                placaVeiculo: veiculos[i].placaVeiculo,
+                marca: veiculos[i].marca,
+                modelo: veiculos[i].modelo,
+                ano: veiculos[i].ano,
+                capacidadeOleo: veiculos[i].capacidadeOleo,
+                cor: veiculos[i].cor,
+                veiculo_idCliente: veiculos[i].idCliente,
+                nomeCliente: veiculos[i].nomeCliente,
+                celularCliente: veiculos[i].celularCliente
+            });
         }
 
         res.json(json);
@@ -128,7 +140,9 @@ module.exports = {
                 ano: veiculos[i].ano,
                 capacidadeOleo: veiculos[i].capacidadeOleo,
                 cor: veiculos[i].cor,
-                veiculo_idCliente: veiculos[i].idCliente
+                veiculo_idCliente: veiculos[i].idCliente,
+                nomeCliente: veiculos[i].nomeCliente,
+                celularCliente: veiculos[i].celularCliente
             });
         }
         

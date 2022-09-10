@@ -72,7 +72,9 @@ module.exports = {
 
     buscarPorCliente: (veiculo_idCliente) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT * FROM Veiculo WHERE Veiculo.idCliente = ?', [veiculo_idCliente], (error, results) => {
+            db.query('SELECT v.placaVeiculo, v.marca, v.modelo, v.ano, v.capacidadeOleo, v.cor, '+
+            'v.idCliente, c.nomeCliente, c.celularCliente FROM Veiculo AS v INNER JOIN Cliente AS c '+
+            'ON v.idCliente = c.idCliente WHERE v.idCliente = ?', [veiculo_idCliente], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 aceito(results);
             });
