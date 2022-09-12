@@ -25,6 +25,22 @@ module.exports = {
         });
     },
 
+    buscarPorNomeCliente: (nomeCliente) => {
+        nomeCliente = "%"+nomeCliente+"%";
+        return new Promise((aceito, rejeitado) => {
+            db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
+            'cidade, uf, complemento FROM Cliente WHERE nomeCliente like ?', [nomeCliente], 
+            (error, results) => {
+                if (error) { rejeitado(error); return; }
+                if (results.length > 0){
+                    aceito(results);
+                } else {
+                    aceito(false);
+                }
+            });
+        });
+    },
+
     buscaPorValor: (valor) => {
         valor = "%"+valor+"%";
         return new Promise((aceito, rejeitado) => {
@@ -40,15 +56,17 @@ module.exports = {
             });
         });
     },
-    
-    inserirProdutoHasOSDetalhes: (idProduto, idOSDetalhes, quantidade, precoUnitario) => {
+
+    inserirCliente: (nomeCliente, cpfCnpj, celularCliente, cep,
+        endereco, numero, cidade, uf, complemento) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(`INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes, quantidade, precoUnitario) VALUES (?, ?, ?, ?)`, 
-                [idProduto, idOSDetalhes, quantidade, precoUnitario],
-            (error, results) => {
-                if(error) {rejeitado(error); return; }
-                aceito(results);
-            });
+            db.query(`INSERT INTO Cliente (nomeCliente, cpfCnpj, celularCliente, cep,` +
+                `endereco, numero, cidade, uf, complemento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, cidade, uf, complemento],
+                (error, results) => {
+                    if (error) { rejeitado(error); return; }
+                    aceito(results.insertId);
+                });
         });
     },
 

@@ -12,7 +12,7 @@ module.exports = {
                 codigoBarras: produtos[i].codigoBarras,
                 descricao: produtos[i].descricao,
                 valorCurto: produtos[i].valorCusto,
-                quantidade: produtos[i].quantidade,
+                quantidadeEstoque: produtos[i].quantidadeEstoque,
                 precoVenda: produtos[i].precoVenda
             });
         }
@@ -32,23 +32,42 @@ module.exports = {
         res.json(json);
     },
 
+    buscaPorValor: async(req, res) => {
+        let json = {error: '', result: []};
+        let valor = req.params.valor;
+        let produtos = await ProdutoService.buscaPorValor(valor);
+
+        for (let i in produtos){
+            json.result.push({
+                idProduto: produtos[i].idProduto,
+                codigoBarras: produtos[i].codigoBarras,
+                descricao: produtos[i].descricao,
+                valorCusto: produtos[i].valorCusto,
+                quantidadeEstoque: produtos[i].quantidadeEstoque,
+                precoVenda: produtos[i].precoVenda,
+            });
+        }
+        
+        res.json(json);
+    },
+
     inserirProduto: async(req, res) => {
         let json = {error: '', result: {}};
         
         let codigoBarras = req.body.codigoBarras;
         let descricao = req.body.descricao;
         let valorCusto = req.body.valorCusto;
-        let quantidade = req.body.quantidade;
+        let quantidadeEstoque = req.body.quantidadeEstoque;
         let precoVenda = req.body.precoVenda;
 
         if(codigoBarras && descricao && precoVenda){
-            let IdProduto = await ProdutoService.inserirProduto(codigoBarras, descricao, valorCusto, quantidade, precoVenda);
+            let IdProduto = await ProdutoService.inserirProduto(codigoBarras, descricao, valorCusto, quantidadeEstoque, precoVenda);
             json.result = {
                 idProduto: IdProduto,
                 codigoBarras,
                 descricao,
                 valorCusto,
-                quantidade,
+                quantidadeEstoque,
                 precoVenda,
             };
         } else {
@@ -64,11 +83,11 @@ module.exports = {
         let id = req.params.id;
         let valorAlteracao = req.body.valorAlteracao;
 
-        let quantidade = await ProdutoService.alterarEstoque(id, valorAlteracao);
+        let quantidadeEstoque = await ProdutoService.alterarEstoque(id, valorAlteracao);
 
         json.result = {
             idProduto: id,
-            quantidade: quantidade
+            quantidadeEstoque: quantidadeEstoque
         }
 
         res.json(json);
@@ -81,17 +100,17 @@ module.exports = {
         let codigoBarras = req.body.codigoBarras;
         let descricao = req.body.descricao;
         let valorCusto = req.body.valorCusto;
-        let quantidade = req.body.quantidade;
+        let quantidadeEstoque = req.body.quantidadeEstoque;
         let precoVenda = req.body.precoVenda;
 
         if(codigoBarras && descricao && precoVenda && idProduto){
-            await ProdutoService.alterarProduto(idProduto, codigoBarras, descricao, valorCusto, quantidade, precoVenda);
+            await ProdutoService.alterarProduto(idProduto, codigoBarras, descricao, valorCusto, quantidadeEstoque, precoVenda);
             json.result = {
                 idProduto,
                 codigoBarras,
                 descricao,
                 valorCusto,
-                quantidade,
+                quantidadeEstoque,
                 precoVenda,
             };
         } else {

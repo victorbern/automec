@@ -59,16 +59,39 @@ module.exports = {
         res.json(json);
     },
 
-    
-    inserirProdutoHasOSDetalhes: (idProduto, idOSDetalhes, quantidade, precoUnitario) => {
-        return new Promise((aceito, rejeitado) => {
-            db.query(`INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes, quantidade, precoUnitario) VALUES (?, ?, ?, ?)`, 
-                [idProduto, idOSDetalhes, quantidade, precoUnitario],
-            (error, results) => {
-                if(error) {rejeitado(error); return; }
-                aceito(results);
-            });
-        });
+    inserirCliente: async(req, res) => {
+        let json = {error: '', result: {}};
+        
+        let nomeCliente = req.body.nomeCliente;
+        let cpfCnpj = req.body.cpfCnpj;
+        let celularCliente = req.body.celularCliente;
+        let cep = req.body.cep;
+        let endereco = req.body.endereco;
+        let numero = req.body.numero;
+        let cidade = req.body.cidade;
+        let uf = req.body.uf;
+        let complemento = req.body.complemento;
+
+        if(nomeCliente && celularCliente && cpfCnpj){
+            let IdCliente = await ClienteService.inserirCliente(nomeCliente, cpfCnpj, celularCliente, cep, 
+                            endereco, numero, cidade, uf, complemento);
+            json.result = {
+                id: IdCliente,
+                nomeCliente,
+                cpfCnpj,
+                celularCliente,
+                cep,
+                endereco,
+                numero,
+                cidade,
+                uf,
+                complemento
+            };
+        } else {
+            json.error = "Campos não enviados";
+        }
+
+        res.json(json);
     },
 
     alterarCliente: async(req, res) => {

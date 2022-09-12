@@ -62,12 +62,12 @@ module.exports = {
         });
     },
 
-    alterarOrdemServico: (idOrdemServico, dataOrdemServico, total, km,
+    alterarOrdemServico: (idOrdemServico, total, km,
         isFinalizada, isPaga, os_idCliente) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('UPDATE OrdemServico SET dataOrdemServico = ?, total = ?, km = ?,' +
-                'isFinalizada = ?, isPaga = ?, OrdemServico.idCliente = ? WHERE idOrdemServico = ?', 
-                [dataOrdemServico, total, km, isFinalizada, isPaga, os_idCliente, idOrdemServico], (error, results) => {
+            db.query('UPDATE OrdemServico SET total = ?, km = ?, ' +
+                'OrdemServico.idCliente = ? WHERE idOrdemServico = ?', 
+                [total, km, os_idCliente, idOrdemServico], (error, results) => {
                     if(error) {rejeitado(error); return; }
                     aceito(results);
             });
@@ -109,7 +109,7 @@ module.exports = {
         });
     },
 
-    buscarProdutoOSDetalhes: (idOSDetalhes) => {
+    buscarVendaPorOSDetalhes: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
             db.query('SELECT idProduto, quantidade, precoUnitario FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?', [idOSDetalhes], (error, results) => {
                 if(error) {rejeitado(error); return; }
@@ -118,6 +118,39 @@ module.exports = {
                 } else {
                     aceito(false);
                 }
+            });
+        });
+    },
+
+    buscarProdutoOSDetalhes: (idOSDetalhes, idProduto) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('SELECT quantidade, precoUnitario FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?', [idOSDetalhes, idProduto], (error, results) => {
+                if(error) {rejeitado(error); return; }
+                if(results.length > 0){
+                    aceito(results);
+                } else {
+                    aceito(false);
+                }
+            });
+        });
+    },
+
+    alterarProdutoOSDetalhes: (idOSDetalhes, idProduto, quantidade, precoUnitario) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('UPDATE Produto_has_OSDetalhes SET quantidade = ?, precoUnitario = ? ' +
+                'WHERE idOSDetalhes = ? && idProduto = ?', 
+                [quantidade, precoUnitario, idOSDetalhes, idProduto], (error, results) => {
+                    if(error) {rejeitado(error); return; }
+                    aceito(results);
+            });
+        });
+    },
+
+    excluirProdutoOSDetalhes: (idOSDetalhes, idProduto) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('DELETE FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?', [idOSDetalhes, idProduto], (error, results) => {
+                if(error) {rejeitado(error); return;}
+                aceito(results);
             });
         });
     },
