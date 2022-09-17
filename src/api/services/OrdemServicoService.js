@@ -62,12 +62,10 @@ module.exports = {
         });
     },
 
-    alterarOrdemServico: (idOrdemServico, total, km,
-        isFinalizada, isPaga, os_idCliente) => {
+    alterarOrdemServico: (idOrdemServico, os_idCliente, os_placaVeiculo, total, km) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('UPDATE OrdemServico SET total = ?, km = ?, ' +
-                'OrdemServico.idCliente = ? WHERE idOrdemServico = ?', 
-                [total, km, os_idCliente, idOrdemServico], (error, results) => {
+            db.query(`UPDATE OrdemServico SET total = ?, km = ?, idCliente = ?, placaVeiculo = ? WHERE idOrdemServico = ?`, 
+                [total, km, os_idCliente, os_placaVeiculo, idOrdemServico], (error, results) => {
                     if(error) {rejeitado(error); return; }
                     aceito(results);
             });
@@ -98,10 +96,10 @@ module.exports = {
         });
     },
 
-    inserirProdutoHasOSDetalhes: (idProduto, idOSDetalhes, quantidade, precoUnitario) => {
+    inserirProdutoHasOSDetalhes: (idProduto, idOSDetalhes, quantidade, precoTotal) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(`INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes, quantidade, precoUnitario) VALUES (?, ?, ?, ?)`, 
-                [idProduto, idOSDetalhes, quantidade, precoUnitario],
+            db.query(`INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes, quantidade, precoTotal) VALUES (?, ?, ?, ?)`, 
+                [idProduto, idOSDetalhes, quantidade, precoTotal],
             (error, results) => {
                 if(error) {rejeitado(error); return; }
                 aceito(results);
@@ -111,7 +109,7 @@ module.exports = {
 
     buscarVendaPorOSDetalhes: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT idProduto, quantidade, precoUnitario FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?', [idOSDetalhes], (error, results) => {
+            db.query('SELECT idProduto, quantidade, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?', [idOSDetalhes], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 if(results.length > 0){
                     aceito(results);
@@ -124,7 +122,7 @@ module.exports = {
 
     buscarProdutoOSDetalhes: (idOSDetalhes, idProduto) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT quantidade, precoUnitario FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?', [idOSDetalhes, idProduto], (error, results) => {
+            db.query('SELECT quantidade, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?', [idOSDetalhes, idProduto], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 if(results.length > 0){
                     aceito(results);
@@ -135,11 +133,11 @@ module.exports = {
         });
     },
 
-    alterarProdutoOSDetalhes: (idOSDetalhes, idProduto, quantidade, precoUnitario) => {
+    alterarProdutoOSDetalhes: (idOSDetalhes, idProduto, quantidade, precoTotal) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('UPDATE Produto_has_OSDetalhes SET quantidade = ?, precoUnitario = ? ' +
+            db.query('UPDATE Produto_has_OSDetalhes SET quantidade = ?, precoTotal = ? ' +
                 'WHERE idOSDetalhes = ? && idProduto = ?', 
-                [quantidade, precoUnitario, idOSDetalhes, idProduto], (error, results) => {
+                [quantidade, precoTotal, idOSDetalhes, idProduto], (error, results) => {
                     if(error) {rejeitado(error); return; }
                     aceito(results);
             });
@@ -166,7 +164,20 @@ module.exports = {
         });
     },
 
-    buscarExecutaFuncao: (idOSDetalhes) => {
+    alterarExecutaFuncao: (idServico, idFuncionario, observacao, idOSDetalhes) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('UPDATE ExecutaFuncao SET observacao = ? WHERE idServico = ? && idFuncionario = ? && idOSDetalhes = ?', [observacao, idServico, idFuncionario, idOSDetalhes], (error, results) => {
+                if(error) {rejeitado(error); return; }
+                if(results.length > 0){
+                    aceito(results);
+                } else {
+                    aceito(false);
+                }
+            });
+        });
+    },
+
+    buscarExecutaFuncaoGeral: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
             db.query('SELECT idFuncionario, idServico, observacao FROM ExecutaFuncao WHERE idOSDetalhes = ?', [idOSDetalhes], (error, results) => {
                 if(error) {rejeitado(error); return; }
@@ -176,6 +187,19 @@ module.exports = {
                     aceito(false);
                 }
             });
+        });
+    },
+
+    buscarExecutaFuncaoEspecifica: (idOSDetalhes, idServico, idFuncionario) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('SELECT idFuncionario, idServico, idOSDetalhes, observacao FROM ExecutaFuncao WHERE idOSDetalhes = ? && idServico = ? && idFuncionario = ?', [idOSDetalhes, idServico, idFuncionario], (error, results) => {
+                if(error) {rejeitado(error); return; }
+                if(results.length > 0){
+                    aceito(results);
+                } else {
+                    aceito(false);
+                }
+            })
         });
     }
 };

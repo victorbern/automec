@@ -78,7 +78,7 @@ module.exports = {
         let cor = req.body.cor;
         let veiculo_idCliente = req.body.veiculo_idCliente;
         
-        if(placaVeiculo && marca && modelo && ano){
+        if(placaVeiculo && marca && modelo && veiculo_idCliente){
             await VeiculoService.inserirVeiculo(placaVeiculo, marca, modelo, ano, 
                             capacidadeOleo, cor, veiculo_idCliente);
             json.result = {
@@ -109,7 +109,7 @@ module.exports = {
         let cor = req.body.cor;
         let veiculo_idCliente = req.body.veiculo_idCliente;
 
-        if(placaVeiculo && marca && modelo && ano){
+        if(placaVeiculo && marca && modelo && veiculo_idCliente){
             await VeiculoService.alterarVeiculo(placaVeiculo, marca, modelo, ano, 
                 capacidadeOleo, cor, veiculo_idCliente);
             json.result = {
