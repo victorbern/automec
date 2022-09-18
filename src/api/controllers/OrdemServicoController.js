@@ -296,22 +296,22 @@ module.exports = {
                             for (let i in servicosCadastrados) {
                                 let servicoExiste = false;
                                 for (let j in servicos) {
-                                    if (servicosCadastrados[i].idProduto === produtos[j].idProduto){
+                                    if (servicosCadastrados[i].idServico == servicos[j].idServico){
                                         servicoExiste = true;
                                     }
                                 }
                                 if (!servicoExiste){
-                                    await OrdemServicoService.excluirProdutoOSDetalhes(osDetalhes.idOSDetalhes, servicosCadastrados[i].idProduto);
+                                    await OrdemServicoService.excluirExecutaFuncao(osDetalhes.idOSDetalhes, servicosCadastrados[i].idServico, servicosCadastrados[i].idFuncionario);
                                 }
                             }
                         }
                         for (let i in servicos) {
-                            let execucao = await OrdemServicoService.buscarExecutaFuncaoEspecifica(osDetalhes.idOSDetalhes, servicos[i].idServico, servicos[i].idFuncionario);
+                            let execucao = await OrdemServicoService.buscarExecutaFuncaoEspecifica(osDetalhes.idOSDetalhes, servicos[i].idServico);
                             if (!execucao) {
-                                await OrdemServicoService.inserirExecutaFuncao(servicos[i].idServico, servicos[i].Funcionario, servicos[i].observacao, osDetalhes.idOSDetalhes);
+                                await OrdemServicoService.inserirExecutaFuncao(servicos[i].idServico, servicos[i].idFuncionario, servicos[i].observacao, osDetalhes.idOSDetalhes);
                                 break;
                             }
-                            if (execucao.observacao !== servicos[i].observacao){
+                            if (execucao.observacao != servicos[i].observacao){
                                 await OrdemServicoService.alterarExecutaFuncao(servicos[i].idServico, servicos[i].idFuncionario, servicos[i].observacao, osDetalhes.idOSDetalhes);
                             }
                         }

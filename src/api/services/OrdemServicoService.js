@@ -166,7 +166,7 @@ module.exports = {
 
     alterarExecutaFuncao: (idServico, idFuncionario, observacao, idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('UPDATE ExecutaFuncao SET observacao = ? WHERE idServico = ? && idFuncionario = ? && idOSDetalhes = ?', [observacao, idServico, idFuncionario, idOSDetalhes], (error, results) => {
+            db.query('UPDATE ExecutaFuncao SET observacao = ?, idFuncionario = ? WHERE idServico = ? && idOSDetalhes = ?', [observacao, idFuncionario, idServico, idOSDetalhes], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 if(results.length > 0){
                     aceito(results);
@@ -191,15 +191,36 @@ module.exports = {
     },
 
     buscarExecutaFuncaoEspecifica: (idOSDetalhes, idServico, idFuncionario) => {
+        if (idFuncionario) {
+            return new Promise((aceito, rejeitado) => {
+                db.query('SELECT idFuncionario, idServico, idOSDetalhes, observacao FROM ExecutaFuncao WHERE idOSDetalhes = ? && idServico = ? && idFuncionario = ?', [idOSDetalhes, idServico, idFuncionario], (error, results) => {
+                    if(error) {rejeitado(error); return; }
+                    if(results.length > 0){
+                        aceito(results[0]);
+                    } else {
+                        aceito(false);
+                    }
+                })
+            });
+        }
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT idFuncionario, idServico, idOSDetalhes, observacao FROM ExecutaFuncao WHERE idOSDetalhes = ? && idServico = ? && idFuncionario = ?', [idOSDetalhes, idServico, idFuncionario], (error, results) => {
+            db.query('SELECT idFuncionario, idServico, idOSDetalhes, observacao FROM ExecutaFuncao WHERE idOSDetalhes = ? && idServico = ?', [idOSDetalhes, idServico], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 if(results.length > 0){
-                    aceito(results);
+                    aceito(results[0]);
                 } else {
                     aceito(false);
                 }
             })
+        });
+    },
+
+    excluirExecutaFuncao: (idOSDetalhes, idServico, idFuncionario) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('DELETE FROM ExecutaFuncao WHERE idOSDetalhes = ? && idServico = ? && idFuncionario = ?', [idOSDetalhes, idServico, idFuncionario], (error, results) => {
+                if(error) {rejeitado(error); return; }
+                aceito(results);
+            });
         });
     }
 };
