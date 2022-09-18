@@ -48,7 +48,7 @@ module.exports = {
                         let servico = await ServicoService.buscarPorId(executaFuncao[i].idServico);
                         // Para cada execução de servico cadastrada, busca todos os dados de funcionário e salva na variável 'funcionário'
                         let funcionario = await FuncionarioService.buscarPorId(executaFuncao[i].idFuncionario);
-                        servicos.push({idServico: executaFuncao[i].idServico, descricaoServico: servico.descricaoServico, precoServico: servico.precoServico, observacao: executaFuncao.observacao, idFuncionario: funcionario.idFuncionario, nomeFuncionario: funcionario.nomeFuncionario});
+                        servicos.push({idServico: executaFuncao[i].idServico, descricaoServico: servico.descricaoServico, precoServico: servico.precoServico, observacao: executaFuncao[i].observacao, idFuncionario: funcionario.idFuncionario, nomeFuncionario: funcionario.nomeFuncionario});
                     }
                 }
                 json.result.push({
@@ -91,7 +91,7 @@ module.exports = {
         if (vendas) {                    
             for (let i in vendas) {
                 let produto = await ProdutoService.buscarPorId(vendas[i].idProduto);
-                produtos.push({idProduto: vendas[i].idProduto, codigoBarras: produto.codigoBarras, descricao: produto.descricao, quantidadeVendida: vendas[i].quantidade, valor: produtos[i].precoTotal});
+                produtos.push({idProduto: vendas[i].idProduto, codigoBarras: produto.codigoBarras, descricao: produto.descricao, quantidadeVendida: vendas[i].quantidade, valor: produto.precoTotal});
             }
         }
         let executaFuncao = await OrdemServicoService.buscarExecutaFuncaoGeral(osDetalhes.idOSDetalhes);
@@ -100,7 +100,7 @@ module.exports = {
             for (let i in executaFuncao) {
                 let servico = await ServicoService.buscarPorId(executaFuncao[i].idServico);
                     let funcionario = await FuncionarioService.buscarPorId(executaFuncao[i].idFuncionario);
-                    servicos.push({idServico: executaFuncao[i].idServico, descricaoServico: servico.descricaoServico, precoServico: servico.precoServico, observacao: executaFuncao.observacao, idFuncionario: funcionario.idFuncionario, nomeFuncionario: funcionario.nomeFuncionario});
+                    servicos.push({idServico: executaFuncao[i].idServico, descricaoServico: servico.descricaoServico, precoServico: servico.precoServico, observacao: executaFuncao[i].observacao, idFuncionario: funcionario.idFuncionario, nomeFuncionario: funcionario.nomeFuncionario});
                 }
             }
         json.result.push({
@@ -166,7 +166,7 @@ module.exports = {
                 for (let i in executaFuncao) {
                     let servico = await ServicoService.buscarPorId(executaFuncao[i].idServico);
                     let funcionario = await FuncionarioService.buscarPorId(executaFuncao[i].idFuncionario);
-                    servicos.push({idServico: executaFuncao[i].idServico, descricaoServico: servico.descricaoServico, precoServico: servico.precoServico, observacao: executaFuncao.observacao, idFuncionario: funcionario.idFuncionario, nomeFuncionario: funcionario.nomeFuncionario});
+                    servicos.push({idServico: executaFuncao[i].idServico, descricaoServico: servico.descricaoServico, precoServico: servico.precoServico, observacao: executaFuncao[i].observacao, idFuncionario: funcionario.idFuncionario, nomeFuncionario: funcionario.nomeFuncionario});
                 }
             }
             json.result.push({
@@ -256,17 +256,15 @@ module.exports = {
                         produtosCadastrados.push({idProduto: vendas[i].idProduto, codigoBarras: produto.codigoBarras, descricao: produto.descricao, quantidadeVendida: vendas[i].quantidade, valor: vendas[i].precoTotal});
                     }
                     if (qs.stringify(produtos) !== qs.stringify(produtosCadastrados)){
-                        if (qs.stringify(produtos).length < qs.stringify(produtosCadastrados).length){
-                            for (let i in produtosCadastrados) {
-                                let produtoExiste = false;
-                                for (let j in produtos) {
-                                    if (produtosCadastrados[i].idProduto == produtos[j].idProduto){
-                                        produtoExiste = true;
-                                    }
+                        for (let i in produtosCadastrados) {
+                            let produtoExiste = false;
+                            for (let j in produtos) {
+                                if (produtosCadastrados[i].idProduto == produtos[j].idProduto){
+                                    produtoExiste = true;
                                 }
-                                if (!produtoExiste){
-                                    await OrdemServicoService.excluirProdutoOSDetalhes(osDetalhes.idOSDetalhes, produtosCadastrados[i].idProduto);
-                                }
+                            }
+                            if (!produtoExiste){
+                                await OrdemServicoService.excluirProdutoOSDetalhes(osDetalhes.idOSDetalhes, produtosCadastrados[i].idProduto);
                             }
                         }
                         for (let i in produtos) {
@@ -292,17 +290,15 @@ module.exports = {
                     }
                     
                     if (qs.stringify(servicosCadastrados) !== qs.stringify(servicos)){
-                        if (qs.stringify(servicos).length < qs.stringify(servicosCadastrados).length){
-                            for (let i in servicosCadastrados) {
-                                let servicoExiste = false;
-                                for (let j in servicos) {
-                                    if (servicosCadastrados[i].idServico == servicos[j].idServico){
-                                        servicoExiste = true;
-                                    }
+                        for (let i in servicosCadastrados) {
+                            let servicoExiste = false;
+                            for (let j in servicos) {
+                                if (servicosCadastrados[i].idServico == servicos[j].idServico && servicosCadastrados[i].idFuncionario == servicos[j].idFuncionario){
+                                    servicoExiste = true;
                                 }
-                                if (!servicoExiste){
-                                    await OrdemServicoService.excluirExecutaFuncao(osDetalhes.idOSDetalhes, servicosCadastrados[i].idServico, servicosCadastrados[i].idFuncionario);
-                                }
+                            }
+                            if (!servicoExiste){
+                                await OrdemServicoService.excluirExecutaFuncao(osDetalhes.idOSDetalhes, servicosCadastrados[i].idServico, servicosCadastrados[i].idFuncionario);
                             }
                         }
                         for (let i in servicos) {
@@ -318,9 +314,12 @@ module.exports = {
                     }
                 }
             }
+            json.result("Dados enviados");
+        } else{
+            json.error("Dados não enviados");
         }
 
-        res.js;
+        res.json(json);
     }
 
 }

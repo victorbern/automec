@@ -166,7 +166,7 @@ module.exports = {
 
     alterarExecutaFuncao: (idServico, idFuncionario, observacao, idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('UPDATE ExecutaFuncao SET observacao = ?, idFuncionario = ? WHERE idServico = ? && idOSDetalhes = ?', [observacao, idFuncionario, idServico, idOSDetalhes], (error, results) => {
+            db.query('UPDATE ExecutaFuncao SET observacao = ? WHERE idServico = ? && idOSDetalhes = ? && idFuncionario = ?', [observacao, idServico, idOSDetalhes, idFuncionario], (error, results) => {
                 if(error) {rejeitado(error); return; }
                 if(results.length > 0){
                     aceito(results);
