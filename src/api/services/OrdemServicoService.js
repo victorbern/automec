@@ -72,6 +72,15 @@ module.exports = {
         });
     },
 
+    excluirOrdemServico: (idOrdemServico) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('DELETE FROM OrdemServico WHERE idOrdemServico = ?', [idOrdemServico], (error, results) => {
+                if (error) { rejeitado(error); return; }
+                aceito(results);
+            });
+        });
+    },
+
     inserirOSDetalhes: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
             db.query(`INSERT INTO OSDetalhes (idOrdemServico, dataOS) VALUES (?, CURDATE())`, 
@@ -94,6 +103,15 @@ module.exports = {
                 }
             });
         });
+    },
+
+    excluirOSDetalhes: (idOSDetalhes) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query('DELETE FROM OSDetalhes WHERE idOSDetalhes = ?', [idOSDetalhes], (error, results) => {
+                if(error) { rejeitado(error); return; }
+                aceito(results);
+            });
+        })
     },
 
     inserirProdutoHasOSDetalhes: (idProduto, idOSDetalhes, quantidade, precoTotal) => {

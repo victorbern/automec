@@ -241,7 +241,7 @@ module.exports = {
         let km = valores.km;
         let produtos = valores.produtos;
         let servicos = valores.servicos;
-
+        
         if (idOrdemServico && idCliente && placaVeiculo){
             await OrdemServicoService.alterarOrdemServico(idOrdemServico,  idCliente, placaVeiculo, total, km); // Altera os dados da ordem de serviço
             let osDetalhes = await OrdemServicoService.buscarOSDetalhes(idOrdemServico);
@@ -314,9 +314,42 @@ module.exports = {
                     }
                 }
             }
-            json.result("Dados enviados");
+            json.result = "Dados enviados";
         } else{
-            json.error("Dados não enviados");
+            json.error = "Dados não enviados";
+        }
+
+        res.json(json);
+    },
+
+    excluirOrdemServico: async (req, res) => {
+        let json = {error: '', result: {}};
+
+        let idOrdemServico = req.params.id;
+        if (idOrdemServico) {
+            let osDetalhes = await OrdemServicoService.buscarOSDetalhes(idOrdemServico);
+
+            if(osDetalhes){
+                let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(osDetalhes.idOSDetalhes);
+                if(vendas){
+                    for (let i in vendas) {
+                        await OrdemServicoService.excluirProdutoOSDetalhes(osDetalhes.idOSDetalhes, vendas[i].idProduto)
+                    }
+                }
+                let executaFuncao = await OrdemServicoService.buscarExecutaFuncaoGeral(osDetalhes.idOSDetalhes);
+                if (executaFuncao) {
+                    for (let i in executaFuncao) {
+                        await OrdemServicoService.excluirExecutaFuncao(osDetalhes.idOSDetalhes, executaFuncao[i].idServico, executaFuncao[i].idFuncionario)
+                    }
+                }
+                await OrdemServicoService.excluirOSDetalhes(osDetalhes.idOSDetalhes);
+            }
+
+            await OrdemServicoService.excluirOrdemServico(idOrdemServico)
+
+            json.result = "Campos enviados";
+        } else {
+            json.error = "Campos não enviados";
         }
 
         res.json(json);

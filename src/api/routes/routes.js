@@ -55,7 +55,7 @@ router.get('/ordens-servico', OrdemServicoController.buscarTodos);
 router.get('/ordem-servico/:id', OrdemServicoController.buscarPorId);
 router.post('/ordem-servico', OrdemServicoController.inserirOrdemServico);
 router.put('/ordem-servico/:id', OrdemServicoController.alterarOrdemServico);
-// router.delete('/cliente/:id', ClienteController.excluirCliente);
+router.delete('/ordem-servico/:id', OrdemServicoController.excluirOrdemServico);
 router.get('/ordens-servico/:valor', OrdemServicoController.buscaPorValor); // Buscar cliente por nome e/ou cpfCnpj
 
 module.exports = router;
