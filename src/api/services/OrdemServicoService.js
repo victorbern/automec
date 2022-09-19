@@ -3,20 +3,23 @@ const db = require("../../db");
 module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
-            db.query("SELECT * FROM OrdemServico", (error, results) => {
-                if (error) {
-                    rejeitado(error);
-                    return;
+            db.executeSQLQuery(
+                "SELECT * FROM OrdemServico",
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
                 }
-                aceito(results);
-            });
+            );
         });
     },
 
     buscarPorId: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
-                "SELECT * FROM OrdemServico WHERE idOrdemServico = ?",
+            db.executeSQLQueryParams(
+                `SELECT * FROM OrdemServico WHERE idOrdemServico = ?`,
                 [idOrdemServico],
                 (error, results) => {
                     if (error) {
@@ -35,7 +38,7 @@ module.exports = {
 
     buscaPorIdCliente: (idCliente) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "SELECT * FROM OrdemServico WHERE idCliente = ?",
                 [idCliente],
                 (error, results) => {
@@ -55,7 +58,7 @@ module.exports = {
 
     buscaPorPlacaVeiculo: (placaVeiculo) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "SELECT * FROM OrdemServico WHERE placaVeiculo like ?",
                 [placaVeiculo],
                 (error, results) => {
@@ -75,7 +78,7 @@ module.exports = {
 
     inserirOrdemServico: (idCliente, placaVeiculo, total, km) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 `INSERT INTO OrdemServico (idCliente, placaVeiculo, total, km) VALUES (?, ?, ?, ?)`,
                 [idCliente, placaVeiculo, total, km],
                 (error, results) => {
@@ -97,7 +100,7 @@ module.exports = {
         km
     ) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 `UPDATE OrdemServico SET total = ?, km = ?, idCliente = ?, placaVeiculo = ? WHERE idOrdemServico = ?`,
                 [total, km, os_idCliente, os_placaVeiculo, idOrdemServico],
                 (error, results) => {
@@ -113,7 +116,7 @@ module.exports = {
 
     excluirOrdemServico: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "DELETE FROM OrdemServico WHERE idOrdemServico = ?",
                 [idOrdemServico],
                 (error, results) => {
@@ -129,7 +132,7 @@ module.exports = {
 
     inserirOSDetalhes: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 `INSERT INTO OSDetalhes (idOrdemServico, dataOS) VALUES (?, CURDATE())`,
                 [idOrdemServico],
                 (error, results) => {
@@ -145,7 +148,7 @@ module.exports = {
 
     buscarOSDetalhes: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "SELECT idOSDetalhes, dataOS FROM OSDetalhes WHERE idOrdemServico = ?",
                 [idOrdemServico],
                 (error, results) => {
@@ -165,7 +168,7 @@ module.exports = {
 
     excluirOSDetalhes: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "DELETE FROM OSDetalhes WHERE idOSDetalhes = ?",
                 [idOSDetalhes],
                 (error, results) => {
@@ -186,7 +189,7 @@ module.exports = {
         precoTotal
     ) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 `INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes, quantidade, precoTotal) VALUES (?, ?, ?, ?)`,
                 [idProduto, idOSDetalhes, quantidade, precoTotal],
                 (error, results) => {
@@ -202,7 +205,7 @@ module.exports = {
 
     buscarVendaPorOSDetalhes: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "SELECT idProduto, quantidade, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?",
                 [idOSDetalhes],
                 (error, results) => {
@@ -222,7 +225,7 @@ module.exports = {
 
     buscarProdutoOSDetalhes: (idOSDetalhes, idProduto) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "SELECT quantidade, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?",
                 [idOSDetalhes, idProduto],
                 (error, results) => {
@@ -247,7 +250,7 @@ module.exports = {
         precoTotal
     ) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "UPDATE Produto_has_OSDetalhes SET quantidade = ?, precoTotal = ? " +
                     "WHERE idOSDetalhes = ? && idProduto = ?",
                 [quantidade, precoTotal, idOSDetalhes, idProduto],
@@ -264,7 +267,7 @@ module.exports = {
 
     excluirProdutoOSDetalhes: (idOSDetalhes, idProduto) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "DELETE FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?",
                 [idOSDetalhes, idProduto],
                 (error, results) => {
@@ -285,7 +288,7 @@ module.exports = {
         idOSDetalhes
     ) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 `INSERT INTO ExecutaFuncao (idServico, idFuncionario, observacao, idOSDetalhes) VALUES (?, ?, ?, ?)`,
                 [idServico, idFuncionario, observacao, idOSDetalhes],
                 (error, results) => {
@@ -306,7 +309,7 @@ module.exports = {
         idOSDetalhes
     ) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "UPDATE ExecutaFuncao SET observacao = ? WHERE idServico = ? && idOSDetalhes = ? && idFuncionario = ?",
                 [observacao, idServico, idOSDetalhes, idFuncionario],
                 (error, results) => {
@@ -326,7 +329,7 @@ module.exports = {
 
     buscarExecutaFuncaoGeral: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "SELECT idFuncionario, idServico, observacao FROM ExecutaFuncao WHERE idOSDetalhes = ?",
                 [idOSDetalhes],
                 (error, results) => {
@@ -347,7 +350,7 @@ module.exports = {
     buscarExecutaFuncaoEspecifica: (idOSDetalhes, idServico, idFuncionario) => {
         if (idFuncionario) {
             return new Promise((aceito, rejeitado) => {
-                db.query(
+                db.executeSQLQueryParams(
                     "SELECT idFuncionario, idServico, idOSDetalhes, observacao FROM ExecutaFuncao WHERE idOSDetalhes = ? && idServico = ? && idFuncionario = ?",
                     [idOSDetalhes, idServico, idFuncionario],
                     (error, results) => {
@@ -365,7 +368,7 @@ module.exports = {
             });
         }
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "SELECT idFuncionario, idServico, idOSDetalhes, observacao FROM ExecutaFuncao WHERE idOSDetalhes = ? && idServico = ?",
                 [idOSDetalhes, idServico],
                 (error, results) => {
@@ -385,7 +388,7 @@ module.exports = {
 
     excluirExecutaFuncao: (idOSDetalhes, idServico, idFuncionario) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(
+            db.executeSQLQueryParams(
                 "DELETE FROM ExecutaFuncao WHERE idOSDetalhes = ? && idServico = ? && idFuncionario = ?",
                 [idOSDetalhes, idServico, idFuncionario],
                 (error, results) => {

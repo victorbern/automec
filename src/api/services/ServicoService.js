@@ -3,68 +3,105 @@ const db = require("../../db");
 module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
-            db.query(`SELECT idServico, descricaoServico, precoServico FROM Servico`, (error, results) => {
-                if (error) { rejeitado(error); return; }
-                aceito(results);
-            });
+            db.executeSQLQuery(
+                `SELECT idServico, descricaoServico, precoServico FROM Servico`,
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
         });
     },
 
     buscarPorId: (id) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT idServico, descricaoServico, precoServico FROM Servico WHERE Servico.idServico = ?', [id], (error, results) => {
-                if (error) { rejeitado(error); return; }
-                if (results.length > 0) {
-                    aceito(results[0]);
-                } else {
-                    aceito(false);
+            db.executeSQLQueryParams(
+                "SELECT idServico, descricaoServico, precoServico FROM Servico WHERE Servico.idServico = ?",
+                [id],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    if (results.length > 0) {
+                        aceito(results[0]);
+                    } else {
+                        aceito(false);
+                    }
                 }
-            });
+            );
         });
     },
 
     buscaPorValor: (valor) => {
-        valor = "%"+valor+"%";
+        valor = "%" + valor + "%";
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT idServico, descricaoServico, precoServico FROM Servico WHERE idServico like ? OR descricaoServico like ?', [valor, valor], 
-            (error, results) => {
-                if (error) { rejeitado(error); return; }
-                if (results.length > 0){
-                    aceito(results);
-                } else {
-                    aceito(false);
+            db.executeSQLQueryParams(
+                "SELECT idServico, descricaoServico, precoServico FROM Servico WHERE idServico like ? OR descricaoServico like ?",
+                [valor, valor],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    if (results.length > 0) {
+                        aceito(results);
+                    } else {
+                        aceito(false);
+                    }
                 }
-            });
+            );
         });
     },
 
     inserirServico: (descricaoServico, precoServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query(`INSERT INTO Servico (descricaoServico, precoServico) VALUES (?, ?)`,
+            db.executeSQLQueryParams(
+                `INSERT INTO Servico (descricaoServico, precoServico) VALUES (?, ?)`,
                 [descricaoServico, precoServico],
                 (error, results) => {
-                    if (error) { rejeitado(error); return; }
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
                     aceito(results.insertId);
-                });
+                }
+            );
         });
     },
 
     alterarServico: (id, descricaoServico, precoServico) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('UPDATE Servico SET descricaoServico = ?, precoServico = ? WHERE idServico = ?',
-                [descricaoServico, precoServico, id], (error, results) => {
-                        if (error) { rejeitado(error); return; }
-                        aceito(results);
-                    });
+            db.executeSQLQueryParams(
+                "UPDATE Servico SET descricaoServico = ?, precoServico = ? WHERE idServico = ?",
+                [descricaoServico, precoServico, id],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
         });
     },
 
     excluirServico: (id) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('DELETE FROM Servico WHERE idServico = ?', [id], (error, results) => {
-                if (error) { rejeitado(error); return; }
-                aceito(results);
-            });
+            db.executeSQLQueryParams(
+                "DELETE FROM Servico WHERE idServico = ?",
+                [id],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
         });
     },
 };

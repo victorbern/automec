@@ -14,7 +14,10 @@ module.exports = {
         let json = { error: "", result: [] };
 
         // Busca todas as ordens de serviços cadastradas no banco de dados
-        let ordens = await OrdemServicoService.buscarTodos();
+        let ordens = await OrdemServicoService.buscarTodos().catch((error) => {
+            json.error = error;
+            res.json(json);
+        });
 
         // Se existir alguma ordem de serviço cadastrada, entra no if. Senão, devolve um json vazio.
         if (ordens) {

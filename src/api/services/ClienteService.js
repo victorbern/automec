@@ -18,7 +18,7 @@ module.exports = {
 
     buscarPorId: (id) => {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQuery(
+            db.executeSQLQueryParams(
                 "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
                     "cidade, uf, complemento FROM Cliente WHERE Cliente.idCliente = ?",
                 [id],
