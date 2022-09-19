@@ -4,7 +4,11 @@ const FuncionarioService = require("../services/FuncionarioService");
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "", result: [] };
-        let funcionarios = await FuncionarioService.buscarTodos();
+        let funcionarios = await FuncionarioService.buscarTodos().catch(
+            (error) => {
+                json.error = error;
+            }
+        );
 
         for (let i in funcionarios) {
             json.result.push({
@@ -21,7 +25,11 @@ module.exports = {
     buscarPorId: async (req, res) => {
         let json = { error: "", result: {} };
         let idFuncionario = req.params.id;
-        let funcionario = await FuncionarioService.buscarPorId(idFuncionario);
+        let funcionario = await FuncionarioService.buscarPorId(
+            idFuncionario
+        ).catch((error) => {
+            json.error = error;
+        });
 
         if (funcionario) {
             json.result = funcionario;
@@ -33,7 +41,11 @@ module.exports = {
     buscaPorValor: async (req, res) => {
         let json = { error: "", result: [] };
         let valor = req.params.valor;
-        let funcionarios = await FuncionarioService.buscaPorValor(valor);
+        let funcionarios = await FuncionarioService.buscaPorValor(valor).catch(
+            (error) => {
+                json.error = error;
+            }
+        );
 
         for (let i in funcionarios) {
             json.result.push({
@@ -59,13 +71,18 @@ module.exports = {
                 nomeFuncionario,
                 isAtivo,
                 funcao
-            );
-            json.result = {
-                idFuncionario: IdFuncionario,
-                nomeFuncionario,
-                isAtivo,
-                funcao,
-            };
+            )
+                .then(() => {
+                    json.result = {
+                        idFuncionario: IdFuncionario,
+                        nomeFuncionario,
+                        isAtivo,
+                        funcao,
+                    };
+                })
+                .catch((error) => {
+                    json.error = error;
+                });
         } else {
             json.error = "Campos não enviados";
         }
@@ -87,13 +104,18 @@ module.exports = {
                 nomeFuncionario,
                 isAtivo,
                 funcao
-            );
-            json.result = {
-                idFuncionario,
-                nomeFuncionario,
-                isAtivo,
-                funcao,
-            };
+            )
+                .then(() => {
+                    json.result = {
+                        idFuncionario,
+                        nomeFuncionario,
+                        isAtivo,
+                        funcao,
+                    };
+                })
+                .catch((error) => {
+                    json.error = error;
+                });
         } else {
             json.error = "Campos não enviados";
         }
@@ -107,10 +129,13 @@ module.exports = {
         let id = req.params.id;
 
         if (id) {
-            await FuncionarioService.excluirFuncionario(id);
-            json.result = {
-                id,
-            };
+            await FuncionarioService.excluirFuncionario(id)
+                .then(() => {
+                    json.result = { id };
+                })
+                .catch((error) => {
+                    json.error = error;
+                });
         } else {
             json.error = "Campos não enviados";
         }
