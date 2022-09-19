@@ -1,112 +1,104 @@
-const { json } = require("body-parser");
-const FuncionarioService = require("../services/FuncionarioService");
+const db = require("../../db");
 
 module.exports = {
-    buscarTodos: async(req, res) => {
-        let json = {error: '', result: []};
-        let funcionarios = await FuncionarioService.buscarTodos();
-
-        for (let i in funcionarios){
-            json.result.push({
-                idFuncionario: funcionarios[i].idFuncionario,
-                nomeFuncionario: funcionarios[i].nomeFuncionario,
-                isAtivo: funcionarios[i].isAtivo,
-                funcao: funcionarios[i].funcao
+    buscarTodos: () => {
+        return new Promise((aceito, rejeitado) => {
+            db.query("SELECT * FROM funcionario", (error, results) => {
+                if (error) {
+                    rejeitado(error);
+                    return;
+                }
+                aceito(results);
             });
-        }
-        
-        res.json(json);
+        });
     },
 
-    buscarPorId: async(req, res) => {
-        let json = {error: '', result: {}};
-        let idFuncionario = req.params.id;
-        let funcionario = await FuncionarioService.buscarPorId(idFuncionario);
-
-        if(funcionario){
-            json.result = funcionario;
-        }
-
-        res.json(json);
+    buscarPorId: (id) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query(
+                "SELECT * FROM funcionario WHERE funcionario.idFuncionario = ?",
+                [id],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    if (results.length > 0) {
+                        aceito(results[0]);
+                    } else {
+                        aceito(false);
+                    }
+                }
+            );
+        });
     },
 
-    buscaPorValor: async(req, res) => {
-        let json = {error: '', result: []};
-        let valor = req.params.valor;
-        let funcionarios = await FuncionarioService.buscaPorValor(valor);
-
-        for (let i in funcionarios){
-            json.result.push({
-                idFuncionario: funcionarios[i].idFuncionario,
-                nomeFuncionario: funcionarios[i].nomeFuncionario,
-                isAtivo: funcionarios[i].isAtivo,
-                funcao: funcionarios[i].funcao
-            });
-        }
-
-        res.json(json);
+    buscaPorValor: (valor) => {
+        valor = "%" + valor + "%";
+        return new Promise((aceito, rejeitado) => {
+            db.query(
+                "SELECT idFuncionario, nomeFuncionario, isAtivo, funcao FROM Funcionario WHERE nomeFuncionario like ? OR funcao like ?",
+                [valor, valor],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    if (results.length > 0) {
+                        aceito(results);
+                    } else {
+                        aceito(false);
+                    }
+                }
+            );
+        });
     },
 
-    inserirFuncionario: async(req, res) => {
-        let json = {error: '', result: {}};
-        
-        let nomeFuncionario = req.body.nomeFuncionario;
-        let isAtivo = req.body.isAtivo;
-        let funcao = req.body.funcao;        
-
-        if(nomeFuncionario && isAtivo && funcao){
-            let IdFuncionario = await FuncionarioService.inserirFuncionario(nomeFuncionario, isAtivo, funcao);
-            json.result = {
-                idFuncionario: IdFuncionario,
-                nomeFuncionario,
-                isAtivo,
-                funcao
-            };
-        } else {
-            json.error = "Campos não enviados";
-        }
-
-        res.json(json);
+    inserirFuncionario: (nomeFuncionario, isAtivo, funcao) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query(
+                `INSERT INTO funcionario (nomeFuncionario, isAtivo, funcao) VALUES (?, ?, ?)`,
+                [nomeFuncionario, isAtivo, funcao],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results.insertId);
+                }
+            );
+        });
     },
 
-    alterarFuncionario: async(req, res) => {
-        let json = {error: '', result: {}};
-
-        let idFuncionario = req.params.id;
-        let nomeFuncionario = req.body.nomeFuncionario;
-        let isAtivo = req.body.isAtivo;
-        let funcao = req.body.funcao;
-
-        if(nomeFuncionario && isAtivo && funcao && idFuncionario){
-            await FuncionarioService.alterarFuncionario(idFuncionario, nomeFuncionario, isAtivo, funcao);
-            json.result = {
-                idFuncionario,
-                nomeFuncionario,
-                isAtivo,
-                funcao
-            };
-        } else {
-            json.error = "Campos não enviados";
-        }
-
-        res.json(json);
+    alterarFuncionario: (idFuncionario, nomeFuncionario, isAtivo, funcao) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query(
+                "UPDATE funcionario SET nomeFuncionario = ?, isAtivo = ?, funcao = ? WHERE idFuncionario = ?",
+                [nomeFuncionario, isAtivo, funcao, idFuncionario],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
+        });
     },
 
-    excluirFuncionario: async (req, res) => {
-        let json = {error: '', result: {}};
-
-        let id = req.params.id;
-
-        if(id){
-            await FuncionarioService.excluirFuncionario(id);
-            json.result = {
-                id
-            };
-        } else {
-            json.error = "Campos não enviados";
-        }
-
-        res.json(json);
-    }
-
-}
+    excluirFuncionario: (id) => {
+        return new Promise((aceito, rejeitado) => {
+            db.query(
+                "DELETE FROM Funcionario WHERE idFuncionario = ?",
+                [id],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
+        });
+    },
+};

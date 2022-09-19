@@ -2,11 +2,13 @@ const { json } = require("body-parser");
 const ClienteService = require("../services/ClienteService");
 
 module.exports = {
-    buscarTodos: async(req, res) => {
-        let json = {error: '', result: []};
-        let clientes = await ClienteService.buscarTodos();
+    buscarTodos: async (req, res) => {
+        let json = { error: "", result: [] };
+        let clientes = await ClienteService.buscarTodos().catch((error) => {
+            json.error = error;
+        });
 
-        for (let i in clientes){
+        for (let i in clientes) {
             json.result.push({
                 idCliente: clientes[i].idCliente,
                 nomeCliente: clientes[i].nomeCliente,
@@ -17,31 +19,37 @@ module.exports = {
                 numero: clientes[i].numero,
                 cidade: clientes[i].cidade,
                 uf: clientes[i].uf,
-                complemento: clientes[i].complemento
+                complemento: clientes[i].complemento,
             });
         }
-        
+
         res.json(json);
     },
 
-    buscarPorId: async(req, res) => {
-        let json = {error: '', result: {}};
+    buscarPorId: async (req, res) => {
+        let json = { error: "", result: {} };
         let id = req.params.id;
-        let cliente = await ClienteService.buscarPorId(id);
+        let cliente = await ClienteService.buscarPorId(id).catch((error) => {
+            json.error = error;
+        });
 
-        if(cliente){
+        if (cliente) {
             json.result = cliente;
         }
 
         res.json(json);
     },
 
-    buscaPorValor: async(req, res) => {
-        let json = {error: '', result: []};
+    buscaPorValor: async (req, res) => {
+        let json = { error: "", result: [] };
         let valor = req.params.valor;
-        let clientes = await ClienteService.buscaPorValor(valor);
+        let clientes = await ClienteService.buscaPorValor(valor).catch(
+            (error) => {
+                json.error = error;
+            }
+        );
 
-        for (let i in clientes){
+        for (let i in clientes) {
             json.result.push({
                 idCliente: clientes[i].idCliente,
                 nomeCliente: clientes[i].nomeCliente,
@@ -52,16 +60,16 @@ module.exports = {
                 numero: clientes[i].numero,
                 cidade: clientes[i].cidade,
                 uf: clientes[i].uf,
-                complemento: clientes[i].complemento
+                complemento: clientes[i].complemento,
             });
         }
-        
+
         res.json(json);
     },
 
-    inserirCliente: async(req, res) => {
-        let json = {error: '', result: {}};
-        
+    inserirCliente: async (req, res) => {
+        let json = { error: "", result: {} };
+
         let nomeCliente = req.body.nomeCliente;
         let cpfCnpj = req.body.cpfCnpj;
         let celularCliente = req.body.celularCliente;
@@ -72,9 +80,21 @@ module.exports = {
         let uf = req.body.uf;
         let complemento = req.body.complemento;
 
-        if(nomeCliente && celularCliente && cpfCnpj){
-            let IdCliente = await ClienteService.inserirCliente(nomeCliente, cpfCnpj, celularCliente, cep, 
-                            endereco, numero, cidade, uf, complemento);
+        if (nomeCliente && celularCliente && cpfCnpj) {
+            let IdCliente = await ClienteService.inserirCliente(
+                nomeCliente,
+                cpfCnpj,
+                celularCliente,
+                cep,
+                endereco,
+                numero,
+                cidade,
+                uf,
+                complemento
+            ).catch((error) => {
+                json.error = error;
+            });
+
             json.result = {
                 id: IdCliente,
                 nomeCliente,
@@ -85,7 +105,7 @@ module.exports = {
                 numero,
                 cidade,
                 uf,
-                complemento
+                complemento,
             };
         } else {
             json.error = "Campos não enviados";
@@ -94,8 +114,8 @@ module.exports = {
         res.json(json);
     },
 
-    alterarCliente: async(req, res) => {
-        let json = {error: '', result: {}};
+    alterarCliente: async (req, res) => {
+        let json = { error: "", result: {} };
 
         let id = req.params.id;
         let nomeCliente = req.body.nomeCliente;
@@ -108,10 +128,8 @@ module.exports = {
         let uf = req.body.uf;
         let complemento = req.body.complemento;
 
-        if(nomeCliente && celularCliente && cpfCnpj && id){
-            await ClienteService.alterarCliente(id, nomeCliente, cpfCnpj, celularCliente, cep,
-                endereco, numero, cidade, uf, complemento);
-            json.result = {
+        if (nomeCliente && celularCliente && cpfCnpj && id) {
+            await ClienteService.alterarCliente(
                 id,
                 nomeCliente,
                 cpfCnpj,
@@ -122,6 +140,20 @@ module.exports = {
                 cidade,
                 uf,
                 complemento
+            ).catch((error) => {
+                json.error = error;
+            });
+            json.result = {
+                id,
+                nomeCliente,
+                cpfCnpj,
+                celularCliente,
+                cep,
+                endereco,
+                numero,
+                cidade,
+                uf,
+                complemento,
             };
         } else {
             json.error = "Campos não enviados";
@@ -131,20 +163,21 @@ module.exports = {
     },
 
     excluirCliente: async (req, res) => {
-        let json = {error: '', result: {}};
+        let json = { error: "", result: {} };
 
         let id = req.params.id;
 
-        if(id){
-            await ClienteService.excluirCliente(id);
+        if (id) {
+            await ClienteService.excluirCliente(id).catch((error) => {
+                json.error = error;
+            });
             json.result = {
-                id
+                id,
             };
         } else {
             json.error = "Campos não enviados";
         }
 
         res.json(json);
-    }
-
-}
+    },
+};

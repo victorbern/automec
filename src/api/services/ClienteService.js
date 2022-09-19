@@ -3,92 +3,173 @@ const db = require("../../db");
 module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
-            db.query(`SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
-            'cidade, uf, complemento FROM Cliente`, (error, results) => {
-                if (error) { rejeitado(error); return; }
-                aceito(results);
-            });
+            db.executeSQLQuery(
+                `SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, cidade, uf, complemento FROM Cliente`,
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
         });
     },
 
     buscarPorId: (id) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
-            'cidade, uf, complemento FROM Cliente WHERE Cliente.idCliente = ?', [id], (error, results) => {
-                if (error) { rejeitado(error); return; }
-                if (results.length > 0) {
-                    aceito(results);
-                } else {
-                    aceito(false);
+            db.executeSQLQuery(
+                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
+                    "cidade, uf, complemento FROM Cliente WHERE Cliente.idCliente = ?",
+                [id],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    if (results.length > 0) {
+                        aceito(results);
+                    } else {
+                        aceito(false);
+                    }
                 }
-            });
+            );
         });
     },
 
     buscarPorNomeCliente: (nomeCliente) => {
-        nomeCliente = "%"+nomeCliente+"%";
+        nomeCliente = "%" + nomeCliente + "%";
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
-            'cidade, uf, complemento FROM Cliente WHERE nomeCliente like ?', [nomeCliente], 
-            (error, results) => {
-                if (error) { rejeitado(error); return; }
-                if (results.length > 0){
-                    aceito(results);
-                } else {
-                    aceito(false);
+            db.executeSQLQueryParams(
+                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
+                    "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ?",
+                [nomeCliente],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    if (results.length > 0) {
+                        aceito(results);
+                    } else {
+                        aceito(false);
+                    }
                 }
-            });
+            );
         });
     },
 
     buscaPorValor: (valor) => {
-        valor = "%"+valor+"%";
+        valor = "%" + valor + "%";
         return new Promise((aceito, rejeitado) => {
-            db.query('SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero,' +
-            'cidade, uf, complemento FROM Cliente WHERE nomeCliente like ? OR cpfCnpj like ?', [valor, valor], 
-            (error, results) => {
-                if (error) { rejeitado(error); return; }
-                if (results.length > 0){
-                    aceito(results);
-                } else {
-                    aceito(false);
-                }
-            });
-        });
-    },
-
-    inserirCliente: (nomeCliente, cpfCnpj, celularCliente, cep,
-        endereco, numero, cidade, uf, complemento) => {
-        return new Promise((aceito, rejeitado) => {
-            db.query(`INSERT INTO Cliente (nomeCliente, cpfCnpj, celularCliente, cep,` +
-                `endereco, numero, cidade, uf, complemento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, cidade, uf, complemento],
+            db.executeSQLQueryParams(
+                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
+                    "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ? OR cpfCnpj like ?",
+                [valor, valor],
                 (error, results) => {
-                    if (error) { rejeitado(error); return; }
-                    aceito(results.insertId);
-                });
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    if (results.length > 0) {
+                        aceito(results);
+                    } else {
+                        aceito(false);
+                    }
+                }
+            );
         });
     },
 
-    alterarCliente: (id, nomeCliente, cpfCnpj, celularCliente, cep,
-        endereco, numero, cidade, uf, complemento) => {
+    inserirCliente: (
+        nomeCliente,
+        cpfCnpj,
+        celularCliente,
+        cep,
+        endereco,
+        numero,
+        cidade,
+        uf,
+        complemento
+    ) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('UPDATE Cliente SET nomeCliente = ?, cpfCnpj = ?, celularCliente = ?,' +
-                'cep = ?, endereco = ?, numero = ?, cidade = ?, uf = ?, complemento = ? WHERE idCliente = ?',
-                [nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, cidade, uf,
-                    complemento, id], (error, results) => {
-                        if (error) { rejeitado(error); return; }
-                        aceito(results);
-                    });
+            db.executeSQLQueryParams(
+                `INSERT INTO Cliente (nomeCliente, cpfCnpj, celularCliente, cep,` +
+                    `endereco, numero, cidade, uf, complemento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    nomeCliente,
+                    cpfCnpj,
+                    celularCliente,
+                    cep,
+                    endereco,
+                    numero,
+                    cidade,
+                    uf,
+                    complemento,
+                ],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results.insertId);
+                }
+            );
+        });
+    },
+
+    alterarCliente: (
+        id,
+        nomeCliente,
+        cpfCnpj,
+        celularCliente,
+        cep,
+        endereco,
+        numero,
+        cidade,
+        uf,
+        complemento
+    ) => {
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                "UPDATE Cliente SET nomeCliente = ?, cpfCnpj = ?, celularCliente = ?," +
+                    "cep = ?, endereco = ?, numero = ?, cidade = ?, uf = ?, complemento = ? WHERE idCliente = ?",
+                [
+                    nomeCliente,
+                    cpfCnpj,
+                    celularCliente,
+                    cep,
+                    endereco,
+                    numero,
+                    cidade,
+                    uf,
+                    complemento,
+                    id,
+                ],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
         });
     },
 
     excluirCliente: (id) => {
         return new Promise((aceito, rejeitado) => {
-            db.query('DELETE FROM Cliente WHERE idCliente = ?', [id], (error, results) => {
-                if (error) { rejeitado(error); return; }
-                aceito(results);
-            });
+            db.executeSQLQueryParams(
+                "DELETE FROM Cliente WHERE idCliente = ?",
+                [id],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
         });
     },
 };
