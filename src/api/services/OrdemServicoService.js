@@ -4,7 +4,7 @@ module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQuery(
-                "SELECT * FROM OrdemServico",
+                `SELECT * FROM OrdemServico`,
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -59,7 +59,7 @@ module.exports = {
     buscaPorPlacaVeiculo: (placaVeiculo) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT * FROM OrdemServico WHERE placaVeiculo like ?",
+                `SELECT * FROM OrdemServico WHERE placaVeiculo like ?`,
                 [placaVeiculo],
                 (error, results) => {
                     if (error) {
@@ -117,7 +117,7 @@ module.exports = {
     excluirOrdemServico: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "DELETE FROM OrdemServico WHERE idOrdemServico = ?",
+                `DELETE FROM OrdemServico WHERE idOrdemServico = ?`,
                 [idOrdemServico],
                 (error, results) => {
                     if (error) {
@@ -149,7 +149,7 @@ module.exports = {
     buscarOSDetalhes: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT idOSDetalhes, dataOS FROM OSDetalhes WHERE idOrdemServico = ?",
+                `SELECT idOSDetalhes, dataOS FROM OSDetalhes WHERE idOrdemServico = ?`,
                 [idOrdemServico],
                 (error, results) => {
                     if (error) {

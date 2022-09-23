@@ -6,7 +6,6 @@ const ProdutoService = require("../services/ProdutoService");
 const VeiculoService = require("../services/VeiculoService");
 const FuncionarioService = require("../services/FuncionarioService");
 const ServicoService = require("../services/ServicoService");
-const { Types } = require("mysql");
 
 module.exports = {
     // Busca todas as ordens de serviço no banco de dados
@@ -15,25 +14,37 @@ module.exports = {
         let json = { error: "", result: [] };
 
         // Busca todas as ordens de serviços cadastradas no banco de dados
-        let ordens = await OrdemServicoService.buscarTodos();
+        let ordens = await OrdemServicoService.buscarTodos().catch((error) => {
+            json.error = error;
+        });
 
         // Se existir alguma ordem de serviço cadastrada, entra no if. Senão, devolve um json vazio.
         if (!ordens) {
-            json.result = "Não foram encontradas nenhuma ordem de serviço";
-            res.json(json);
+            json.result[0] = "Não foram encontradas nenhuma ordem de serviço";
         }
         // Percorre cada ordm de serviço cadastrada no banco
         for (let i in ordens) {
             // Para cada ordem de serviço cadastrada, busca todos os dados do cliente e salva na variável 'cliente'
-            let cliente = await ClienteService.buscarPorId(ordens[i].idCliente);
+            let cliente = await ClienteService.buscarPorId(
+                ordens[i].idCliente
+            ).catch((error) => {
+                json.result = "";
+                json.error = error;
+            });
             // Para cada ordem de serviço cadastrada, busca todos os dados do veiculo e salva na variável 'veiculo'
             let veiculo = await VeiculoService.buscarPorPlaca(
                 ordens[i].placaVeiculo
-            );
+            ).catch((error) => {
+                json.result = "";
+                json.error = error;
+            });
             // Busca os dados da tabela OSDetalhes para cada ordem de serviço
             let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
                 ordens[i].idOrdemServico
-            );
+            ).catch((error) => {
+                json.result = "";
+                json.error = error;
+            });
             let vendas, executaFuncao;
             if (osDetalhes) {
                 // Busca de todas as instancias de Produto_has_OSDetalhes salvas no banco, ou seja, todas as vendas de produtos desta ordem de serviço e salva em 'vendas'
@@ -46,9 +57,9 @@ module.exports = {
                         osDetalhes.idOSDetalhes
                     );
             }
+            // instancia uma variavel para armazenar os dados de cada produto em um json
+            let produtos = [];
             if (vendas) {
-                // instancia uma variavel para armazenar os dados de cada produto em um json
-                let produtos = [];
                 for (let i in vendas) {
                     // Para cada venda cadastrada, busca todos os dados de produto e salva na variável 'produto'
                     let produto = await ProdutoService.buscarPorId(
@@ -64,9 +75,9 @@ module.exports = {
                 }
             }
 
+            // instancia uma variável para armazenas os dados de cada servico executado em um json
+            let servicos = [];
             if (executaFuncao) {
-                // instancia uma variável para armazenas os dados de cada servico executado em um json
-                let servicos = [];
                 for (let i in executaFuncao) {
                     // Para cada execução de servico cadastrada, busca todos os dados de servico e salva na variável 'servico'
                     let servico = await ServicoService.buscarPorId(
@@ -92,14 +103,13 @@ module.exports = {
                 km: ordens[i].km,
                 isFinalizada: ordens[i].isFinalizada,
                 isPaga: ordens[i].isPaga,
-                cliente: cliente[0],
+                cliente: cliente,
                 veiculo: veiculo[0],
                 data: osDetalhes.dataOS,
                 produtos: produtos,
                 servicos: servicos,
             });
         }
-
         res.json(json);
     },
 
@@ -113,14 +123,16 @@ module.exports = {
 
         if (!idOrdemServico) {
             json.error = "Campo id faltante";
-            res.json(json);
         }
         // Busca a ordem de serviço que possui aquele id e salva na variável 'ordem'
         let ordem = await OrdemServicoService.buscarPorId(idOrdemServico);
 
         if (!ordem) {
-            json.result = `Ordem de serviço não encontrada para o id '${idOrdemServico}'`;
+            json.result.push(
+                "Ordem de serviço não encontrada para o id especificado"
+            );
             res.json(json);
+            return;
         }
         // Busca todos os dados do cliente desta ordem
         let cliente = await ClienteService.buscarPorId(ordem.idCliente);
@@ -139,8 +151,8 @@ module.exports = {
                 osDetalhes.idOSDetalhes
             );
         }
+        let produtos = [];
         if (vendas) {
-            let produtos = [];
             for (let i in vendas) {
                 let produto = await ProdutoService.buscarPorId(
                     vendas[i].idProduto
@@ -155,8 +167,8 @@ module.exports = {
             }
         }
 
+        let servicos = [];
         if (executaFuncao) {
-            let servicos = [];
             for (let i in executaFuncao) {
                 let servico = await ServicoService.buscarPorId(
                     executaFuncao[i].idServico
@@ -214,10 +226,8 @@ module.exports = {
             }
         }
         for (let i in veiculos) {
-            ordens.push(
-                await OrdemServicoService.buscaPorPlacaVeiculo(
-                    veiculos[i].placaVeiculo
-                )
+            ordem = await OrdemServicoService.buscaPorPlacaVeiculo(
+                veiculos[i].placaVeiculo
             );
             if (ordem) {
                 ordens.push(ordem);
@@ -228,7 +238,6 @@ module.exports = {
         ordens = ordens.filter(function (a) {
             return !this[JSON.stringify(a)] && (this[JSON.stringify(a)] = true);
         }, Object.create(null));
-
         for (let i in ordens) {
             let cliente = await ClienteService.buscarPorId(ordens[i].idCliente);
             let veiculo = await VeiculoService.buscarPorPlaca(
@@ -248,8 +257,8 @@ module.exports = {
                     );
             }
 
+            let produtos = [];
             if (vendas) {
-                let produtos = [];
                 for (let i in vendas) {
                     let produto = await ProdutoService.buscarPorId(
                         vendas[i].idProduto
@@ -263,8 +272,8 @@ module.exports = {
                     });
                 }
             }
+            let servicos = [];
             if (executaFuncao) {
-                let servicos = [];
                 for (let i in executaFuncao) {
                     let servico = await ServicoService.buscarPorId(
                         executaFuncao[i].idServico
@@ -319,7 +328,6 @@ module.exports = {
                 km
             ).catch((error) => {
                 json.error = error;
-                res.json;
             });
             if (idOrdemServico) {
                 let idOSDetalhes = await OrdemServicoService.inserirOSDetalhes(
@@ -335,11 +343,15 @@ module.exports = {
                             idOSDetalhes,
                             quantidade,
                             precoTotal
-                        );
+                        ).catch((error) => {
+                            json.error = error;
+                        });
                         await ProdutoService.alterarEstoque(
                             idProduto,
                             quantidade * -1
-                        );
+                        ).catch((error) => {
+                            json.error = error;
+                        });
                     }
                 }
                 if (valores.servicos) {
@@ -352,7 +364,9 @@ module.exports = {
                             idFuncionario,
                             observacao,
                             idOSDetalhes
-                        );
+                        ).catch((error) => {
+                            json.error = error;
+                        });
                     }
                 }
             }
@@ -387,7 +401,6 @@ module.exports = {
                 km
             ).catch((error) => {
                 json.error = error;
-                res.json(json);
             }); // Altera os dados da ordem de serviço
             let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
                 idOrdemServico
@@ -582,7 +595,6 @@ module.exports = {
                     osDetalhes.idOSDetalhes
                 ).catch((error) => {
                     json.error = error;
-                    res.json(json);
                 });
             }
 

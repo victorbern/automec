@@ -4,9 +4,9 @@ module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQuery(
-                "SELECT v.placaVeiculo, v.marca, v.modelo, v.ano, v.capacidadeOleo, v.cor, " +
-                    "v.idCliente, c.nomeCliente, c.celularCliente FROM Veiculo AS v INNER JOIN Cliente AS c " +
-                    "ON v.idCliente = c.idCliente",
+                `SELECT v.placaVeiculo, v.marca, v.modelo, v.ano, v.capacidadeOleo, v.cor, 
+                    v.idCliente, c.nomeCliente, c.celularCliente FROM Veiculo AS v INNER JOIN Cliente AS c 
+                    ON v.idCliente = c.idCliente`,
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -151,7 +151,7 @@ module.exports = {
     excluirVeiculo: (id) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "DELETE FROM Veiculo WHERE placaVeiculo = ?",
+                `DELETE FROM Veiculo WHERE placaVeiculo = ?`,
                 [id],
                 (error, results) => {
                     if (error) {
