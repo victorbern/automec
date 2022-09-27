@@ -28,25 +28,22 @@ module.exports = {
     buscarPorPlaca: async (req, res) => {
         let json = { error: "", result: [] };
         let placa = req.params.placa;
-        let veiculos = await VeiculoService.buscarPorPlaca(placa).catch(
+        let veiculo = await VeiculoService.buscaEspecificaPlaca(placa).catch(
             (error) => {
                 json.error = error;
             }
         );
-
-        for (let i in veiculos) {
-            json.result.push({
-                placaVeiculo: veiculos[i].placaVeiculo,
-                marca: veiculos[i].marca,
-                modelo: veiculos[i].modelo,
-                ano: veiculos[i].ano,
-                capacidadeOleo: veiculos[i].capacidadeOleo,
-                cor: veiculos[i].cor,
-                veiculo_idCliente: veiculos[i].idCliente,
-                nomeCliente: veiculos[i].nomeCliente,
-                celularCliente: veiculos[i].celularCliente,
-            });
-        }
+        json.result.push({
+            placaVeiculo: veiculo.placaVeiculo,
+            marca: veiculo.marca,
+            modelo: veiculo.modelo,
+            ano: veiculo.ano,
+            capacidadeOleo: veiculo.capacidadeOleo,
+            cor: veiculo.cor,
+            veiculo_idCliente: veiculo.idCliente,
+            nomeCliente: veiculo.nomeCliente,
+            celularCliente: veiculo.celularCliente,
+        });
 
         res.json(json);
     },

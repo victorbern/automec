@@ -102,34 +102,11 @@ module.exports = {
         });
     },
 
-    alterarVendaDireta: (
-        id,
-        nomeCliente,
-        cpfCnpj,
-        celularCliente,
-        cep,
-        endereco,
-        numero,
-        cidade,
-        uf,
-        complemento
-    ) => {
+    alterarVendaDireta: (idVendaDireta, total) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "UPDATE Cliente SET nomeCliente = ?, cpfCnpj = ?, celularCliente = ?," +
-                    "cep = ?, endereco = ?, numero = ?, cidade = ?, uf = ?, complemento = ? WHERE idCliente = ?",
-                [
-                    nomeCliente,
-                    cpfCnpj,
-                    celularCliente,
-                    cep,
-                    endereco,
-                    numero,
-                    cidade,
-                    uf,
-                    complemento,
-                    id,
-                ],
+                "UPDATE VendaDireta SET total = ? WHERE idVendaDireta = ?",
+                [total, idVendaDireta],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -141,11 +118,11 @@ module.exports = {
         });
     },
 
-    excluirCliente: (id) => {
+    excluirVendaDireta: (idVendaDireta) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "DELETE FROM Cliente WHERE idCliente = ?",
-                [id],
+                `DELETE FROM VendaDireta WHERE idVendaDireta = ?`,
+                [idVendaDireta],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -167,7 +144,11 @@ module.exports = {
                         rejeitado(error);
                         return;
                     }
-                    aceito(results);
+                    if (results.length > 0) {
+                        aceito(results);
+                    } else {
+                        aceito(false);
+                    }
                 }
             );
         });
@@ -192,13 +173,34 @@ module.exports = {
             );
         });
     },
+
+    buscarVendaEspecifica: (idVendaDireta, idProduto) => {
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                `SELECT idVendaDireta, idProduto, quantidadeVendida, precoTotal FROM Produto_has_VendaDireta WHERE idVendaDireta = ? && idProduto = ?`,
+                [idVendaDireta, idProduto],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    if (results.length > 0) {
+                        aceito(results[0]);
+                    } else {
+                        aceito(false);
+                    }
+                }
+            );
+        });
+    },
+
     inserirProduto_has_VendaDireta: (
         idVendaDireta,
         idProduto,
         quantidadeVendida,
         precoTotal
     ) => {
-        return new Promise((aceito, recusado) => {
+        return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
                 `INSERT INTO Produto_has_VendaDireta (idVendaDireta, idProduto, quantidadeVendida, precoTotal) VALUES (?, ?, ?, ?)`,
                 [idVendaDireta, idProduto, quantidadeVendida, precoTotal],
@@ -212,7 +214,42 @@ module.exports = {
             );
         });
     },
-    // excluirProdutoVendaDireta: (  )
+
+    alterarProduto_has_VendaDireta: (
+        idVendaDireta,
+        idProduto,
+        quantidadeVendida,
+        precoTotal
+    ) => {
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                `UPDATE Produto_has_VendaDireta SET quantidadeVendida = ?, precoTotal = ? WHERE idVendaDireta = ? && idProduto = ?`,
+                [quantidadeVendida, precoTotal, idVendaDireta, idProduto],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
+        });
+    },
+    excluirProdutoVendaDireta: (idVendaDireta, idProduto) => {
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                `DELETE FROM Produto_has_VendaDireta WHERE idVendaDireta = ? && idProduto = ?`,
+                [idVendaDireta, idProduto],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
+        });
+    },
 };
 
 // Alterações feitas no dia 27/08/2022

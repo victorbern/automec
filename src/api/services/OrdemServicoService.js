@@ -58,6 +58,7 @@ module.exports = {
 
     buscaPorPlacaVeiculo: (placaVeiculo) => {
         return new Promise((aceito, rejeitado) => {
+            placaVeiculo = "%" + placaVeiculo + "%";
             db.executeSQLQueryParams(
                 `SELECT * FROM OrdemServico WHERE placaVeiculo like ?`,
                 [placaVeiculo],
@@ -67,7 +68,7 @@ module.exports = {
                         return;
                     }
                     if (results.length > 0) {
-                        aceito(results[0]);
+                        aceito(results);
                     } else {
                         aceito(false);
                     }
@@ -185,13 +186,13 @@ module.exports = {
     inserirProdutoHasOSDetalhes: (
         idProduto,
         idOSDetalhes,
-        quantidade,
+        quantidadeVendida,
         precoTotal
     ) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes, quantidade, precoTotal) VALUES (?, ?, ?, ?)`,
-                [idProduto, idOSDetalhes, quantidade, precoTotal],
+                `INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes, quantidadeVendida, precoTotal) VALUES (?, ?, ?, ?)`,
+                [idProduto, idOSDetalhes, quantidadeVendida, precoTotal],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -206,7 +207,7 @@ module.exports = {
     buscarVendaPorOSDetalhes: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT idProduto, quantidade, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?",
+                "SELECT idProduto, quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?",
                 [idOSDetalhes],
                 (error, results) => {
                     if (error) {
@@ -226,7 +227,7 @@ module.exports = {
     buscarProdutoOSDetalhes: (idOSDetalhes, idProduto) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT quantidade, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?",
+                "SELECT quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?",
                 [idOSDetalhes, idProduto],
                 (error, results) => {
                     if (error) {
@@ -246,14 +247,14 @@ module.exports = {
     alterarProdutoOSDetalhes: (
         idOSDetalhes,
         idProduto,
-        quantidade,
+        quantidadeVendida,
         precoTotal
     ) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "UPDATE Produto_has_OSDetalhes SET quantidade = ?, precoTotal = ? " +
+                "UPDATE Produto_has_OSDetalhes SET quantidadeVendida = ?, precoTotal = ? " +
                     "WHERE idOSDetalhes = ? && idProduto = ?",
-                [quantidade, precoTotal, idOSDetalhes, idProduto],
+                [quantidadeVendida, precoTotal, idOSDetalhes, idProduto],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);

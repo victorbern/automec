@@ -32,7 +32,7 @@ module.exports = {
                 json.error = error;
             });
             // Para cada ordem de serviço cadastrada, busca todos os dados do veiculo e salva na variável 'veiculo'
-            let veiculo = await VeiculoService.buscarPorPlaca(
+            let veiculo = await VeiculoService.buscaEspecificaPlaca(
                 ordens[i].placaVeiculo
             ).catch((error) => {
                 json.result = "";
@@ -69,8 +69,8 @@ module.exports = {
                         idProduto: vendas[i].idProduto,
                         codigoBarras: produto.codigoBarras,
                         descricao: produto.descricao,
-                        quantidadeVendida: vendas[i].quantidade,
-                        valor: vendas[i].precoTotal,
+                        quantidadeVendida: vendas[i].quantidadeVendida,
+                        precoTotal: vendas[i].precoTotal,
                     });
                 }
             }
@@ -104,7 +104,7 @@ module.exports = {
                 isFinalizada: ordens[i].isFinalizada,
                 isPaga: ordens[i].isPaga,
                 cliente: cliente,
-                veiculo: veiculo[0],
+                veiculo: veiculo,
                 data: osDetalhes.dataOS,
                 produtos: produtos,
                 servicos: servicos,
@@ -138,7 +138,9 @@ module.exports = {
         let cliente = await ClienteService.buscarPorId(ordem.idCliente);
 
         // Busca todos os dados do veiculo desta ordem
-        let veiculo = await VeiculoService.buscarPorPlaca(ordem.placaVeiculo);
+        let veiculo = await VeiculoService.buscaEspecificaPlaca(
+            ordem.placaVeiculo
+        );
         let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
             ordem.idOrdemServico
         );
@@ -161,8 +163,8 @@ module.exports = {
                     idProduto: vendas[i].idProduto,
                     codigoBarras: produto.codigoBarras,
                     descricao: produto.descricao,
-                    quantidadeVendida: vendas[i].quantidade,
-                    valor: produto.precoTotal,
+                    quantidadeVendida: vendas[i].quantidadeVendida,
+                    precoTotal: produto.precoTotal,
                 });
             }
         }
@@ -192,8 +194,8 @@ module.exports = {
             km: ordem.km,
             isFinalizada: ordem.isFinalizada,
             isPaga: ordem.isPaga,
-            cliente: cliente[0],
-            veiculo: veiculo[0],
+            cliente: cliente,
+            veiculo: veiculo,
             data: osDetalhes.dataOS,
             produtos: produtos,
             servicos: servicos,
@@ -240,7 +242,7 @@ module.exports = {
         }, Object.create(null));
         for (let i in ordens) {
             let cliente = await ClienteService.buscarPorId(ordens[i].idCliente);
-            let veiculo = await VeiculoService.buscarPorPlaca(
+            let veiculo = await VeiculoService.buscaEspecificaPlaca(
                 ordens[i].placaVeiculo
             );
             let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
@@ -267,8 +269,8 @@ module.exports = {
                         idProduto: vendas[i].idProduto,
                         codigoBarras: produto.codigoBarras,
                         descricao: produto.descricao,
-                        quantidadeVendida: vendas[i].quantidade,
-                        valor: produtos[i].precoTotal,
+                        quantidadeVendida: vendas[i].quantidadeVendida,
+                        precoTotal: vendas[i].precoTotal,
                     });
                 }
             }
@@ -297,8 +299,8 @@ module.exports = {
                 km: ordens[i].km,
                 isFinalizada: ordens[i].isFinalizada,
                 isPaga: ordens[i].isPaga,
-                cliente: cliente[0],
-                veiculo: veiculo[0],
+                cliente: cliente,
+                veiculo: veiculo,
                 data: osDetalhes.dataOS,
                 produtos: produtos,
                 servicos: servicos,
@@ -336,19 +338,20 @@ module.exports = {
                 if (valores.produtos) {
                     for (let i in valores.produtos) {
                         let idProduto = valores.produtos[i].idProduto * 1;
-                        let quantidade = valores.produtos[i].quantidade * 1;
+                        let quantidadeVendida =
+                            valores.produtos[i].quantidadeVendida * 1;
                         let precoTotal = valores.produtos[i].precoTotal * 1;
                         await OrdemServicoService.inserirProdutoHasOSDetalhes(
                             idProduto,
                             idOSDetalhes,
-                            quantidade,
+                            quantidadeVendida,
                             precoTotal
                         ).catch((error) => {
                             json.error = error;
                         });
                         await ProdutoService.alterarEstoque(
                             idProduto,
-                            quantidade * -1
+                            quantidadeVendida * -1
                         ).catch((error) => {
                             json.error = error;
                         });
@@ -411,18 +414,13 @@ module.exports = {
                 let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
                     osDetalhes.idOSDetalhes
                 );
+                let produtosCadastrados = [];
                 if (vendas) {
-                    let produtosCadastrados = [];
                     for (let i in vendas) {
-                        let produto = await ProdutoService.buscarPorId(
-                            vendas[i].idProduto
-                        );
                         produtosCadastrados.push({
                             idProduto: vendas[i].idProduto,
-                            codigoBarras: produto.codigoBarras,
-                            descricao: produto.descricao,
-                            quantidadeVendida: vendas[i].quantidade,
-                            valor: vendas[i].precoTotal,
+                            quantidadeVendida: vendas[i].quantidadeVendida,
+                            precoTotal: vendas[i].precoTotal,
                         });
                     }
                     if (
@@ -456,19 +454,20 @@ module.exports = {
                                 await OrdemServicoService.inserirProdutoHasOSDetalhes(
                                     produtos[i].idProduto,
                                     osDetalhes.idOSDetalhes,
-                                    produtos[i].quantidade,
+                                    produtos[i].quantidadeVendida,
                                     produtos[i].precoTotal
                                 );
                                 break;
                             }
                             if (
-                                venda.quantidade !== produtos[i].quantidade ||
+                                venda.quantidadeVendida !==
+                                    produtos[i].quantidadeVendida ||
                                 venda.precoTotal !== produtos[i].precoTotal
                             ) {
                                 await OrdemServicoService.alterarProdutoOSDetalhes(
                                     osDetalhes.idOSDetalhes,
                                     produtos[i].idProduto,
-                                    produtos[i].quantidade,
+                                    produtos[i].quantidadeVendida,
                                     produtos[i].precoTotal
                                 );
                             }
@@ -483,21 +482,12 @@ module.exports = {
                 if (executaFuncao) {
                     let servicosCadastrados = [];
                     for (let i in executaFuncao) {
-                        let servico = await ServicoService.buscarPorId(
-                            executaFuncao[i].idServico
-                        );
-                        let funcionario = await FuncionarioService.buscarPorId(
-                            executaFuncao[i].idFuncionario
-                        );
                         servicosCadastrados.push({
                             idServico: executaFuncao[i].idServico,
-                            descricaoServico: servico.descricaoServico,
-                            precoServico: servico.precoServico,
                             idFuncionario: executaFuncao[i].idFuncionario,
-                            nomeFuncionario: funcionario.nomeFuncionario,
+                            observacao: executaFuncao[i].observacao,
                         });
                     }
-
                     if (
                         qs.stringify(servicosCadastrados) !==
                         qs.stringify(servicos)

@@ -18,6 +18,28 @@ module.exports = {
         });
     },
 
+    buscaEspecificaPlaca: (placa) => {
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                "SELECT v.placaVeiculo, v.marca, v.modelo, v.ano, v.capacidadeOleo, v.cor, " +
+                    "v.idCliente, c.nomeCliente, c.celularCliente FROM Veiculo AS v INNER JOIN Cliente AS c " +
+                    "ON v.idCliente = c.idCliente WHERE placaVeiculo = ?",
+                [placa],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    if (results.length > 0) {
+                        aceito(results[0]);
+                    } else {
+                        aceito(false);
+                    }
+                }
+            );
+        });
+    },
+
     buscarPorPlaca: (placa) => {
         placa = "%" + placa + "%";
         return new Promise((aceito, rejeitado) => {

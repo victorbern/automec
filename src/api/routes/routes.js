@@ -8,6 +8,7 @@ const ProdutoController = require("../controllers/ProdutoController");
 const ServicoController = require("../controllers/ServicoController");
 const VeiculoController = require("../controllers/VeiculoController");
 const VendaDiretaController = require("../controllers/VendaDiretaController");
+const VendaDiretaService = require("../services/VendaDiretaService");
 
 // APIs para cliente
 router.get("/clientes", ClienteController.buscarTodos); // Buscar todos os clientes
@@ -66,8 +67,8 @@ router.get("/ordens-servico/:valor", OrdemServicoController.buscaPorValor); // B
 router.get("/vendas-direta", VendaDiretaController.buscarTodos); // Buscar todas as vendas diretas
 router.get("/venda-direta/:id", VendaDiretaController.buscarPorId); // Buscar venda direta por id
 router.post("/venda-direta", VendaDiretaController.inserirVendaDireta); // Inserir novo cliente no banco de dados
-// router.put("/cliente/:id", ClienteController.alterarCliente); // Alterar dados de um cliente
-// router.delete("/cliente/:id", ClienteController.excluirCliente); // Deletar um cliente do banco de dados
+router.put("/venda-direta/:id", VendaDiretaController.alterarVendaDireta); // Alterar dados de uma venda direta
+router.delete("/venda-direta/:id", VendaDiretaService.excluirVendaDireta); // Deletar um cliente do banco de dados
 router.get("/vendas-direta/:valor", VendaDiretaController.buscaPorValor); // Buscar venda direta por id ou por produto
 
 module.exports = router;

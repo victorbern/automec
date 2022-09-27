@@ -237,8 +237,9 @@ module.exports = {
     alterarVendaDireta: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let idVendaDireta = req.params.idVendaDireta;
+        let idVendaDireta = req.params.id;
         let valores = req.body;
+        valores = qs.parse(valores);
 
         let total = valores.total;
 
@@ -248,23 +249,19 @@ module.exports = {
                 total
             ).catch((error) => {
                 json.error = error;
-                res.json(json);
-                return;
             });
             let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
                 idVendaDireta
             ).catch((error) => {
                 json.error = error;
-                res.json(json);
-                return;
             });
+            let vendasCadastradas = [];
             if (vendas) {
-                let vendasCadastradas = [];
                 for (let i in vendas) {
                     vendasCadastradas.push({
                         idProduto: vendas[i].idProduto,
                         quantidadeVendida: vendas[i].quantidadeVendida,
-                        dataHora: vendas[i].dataHora,
+                        precoTotal: vendas[i].precoTotal,
                     });
                 }
             }
@@ -274,68 +271,81 @@ module.exports = {
             ) {
                 for (let i in vendasCadastradas) {
                     let produtoExiste = false;
-                    for (let j in vendas) {
+                    for (let j in valores.produtos) {
                         if (
                             vendasCadastradas[i].idProduto ==
-                            vendas[j].idProduto
+                            valores.produtos[j].idProduto
                         ) {
                             produtoExiste = true;
                         }
                     }
-
                     if (!produtoExiste) {
-                        await VendaDiretaService.excluirProdutoVendaDireta;
+                        await VendaDiretaService.excluirProdutoVendaDireta(
+                            idVendaDireta,
+                            vendasCadastradas[i].idProduto
+                        ).catch((error) => {
+                            json.error = error;
+                        });
+                    }
+                }
+                for (let i in valores.produtos) {
+                    let venda = await VendaDiretaService.buscarVendaEspecifica(
+                        idVendaDireta,
+                        valores.produtos[i].idProduto
+                    );
+                    if (!venda) {
+                        await VendaDiretaService.inserirProduto_has_VendaDireta(
+                            idVendaDireta,
+                            valores.produtos[i].idProduto,
+                            valores.produtos[i].quantidadeVendida,
+                            valores.produtos[i].precoTotal
+                        );
+                        break;
+                    }
+                    if (
+                        venda.quantidadeVendida !==
+                            valores.produtos[i].quantidadeVendida ||
+                        venda.precoTotal !== valores.produtos[i].precoTotal
+                    ) {
+                        await VendaDiretaService.alterarProduto_has_VendaDireta(
+                            idVendaDireta,
+                            valores.produtos[i].idProduto,
+                            valores.produtos[i].quantidadeVendida,
+                            valores.produtos[i].precoTotal
+                        );
                     }
                 }
             }
-        }
-
-        if (nomeCliente && celularCliente && cpfCnpj && id) {
-            await ClienteService.alterarCliente(
-                id,
-                nomeCliente,
-                cpfCnpj,
-                celularCliente,
-                cep,
-                endereco,
-                numero,
-                cidade,
-                uf,
-                complemento
-            );
-            json.result = {
-                id,
-                nomeCliente,
-                cpfCnpj,
-                celularCliente,
-                cep,
-                endereco,
-                numero,
-                cidade,
-                uf,
-                complemento,
-            };
+            json.result = "Dados enviados";
         } else {
-            json.error = "Campos não enviados";
+            json.result = "Dados não enviados";
         }
 
         res.json(json);
     },
 
-    excluirCliente: async (req, res) => {
+    excluirVendaDireta: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let id = req.params.id;
-
-        if (id) {
-            await ClienteService.excluirCliente(id);
-            json.result = {
-                id,
-            };
-        } else {
-            json.error = "Campos não enviados";
+        let idVendaDireta = req.params.id;
+        if (idVendaDireta) {
+            let vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
+                idVendaDireta
+            ).catch((error) => {
+                json.error = error;
+            });
+            for (let i in vendas) {
+                await VendaDiretaService.excluirProdutoVendaDireta(
+                    vendas[i].IdVendaDireta,
+                    vendas[i].idProduto
+                );
+            }
+            await VendaDiretaService.excluirVendaDireta(idVendaDireta).catch(
+                (error) => {
+                    json.error = error;
+                }
+            );
         }
-
         res.json(json);
     },
 };
