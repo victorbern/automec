@@ -336,15 +336,22 @@ module.exports = {
             });
             for (let i in vendas) {
                 await VendaDiretaService.excluirProdutoVendaDireta(
-                    vendas[i].IdVendaDireta,
+                    vendas[i].idVendaDireta,
                     vendas[i].idProduto
-                );
+                ).catch((error) => {
+                    json.error = error;
+                    res.json(json);
+                    return;
+                });
             }
             await VendaDiretaService.excluirVendaDireta(idVendaDireta).catch(
                 (error) => {
                     json.error = error;
                 }
             );
+            json.result = "Dados excluidos com sucesso!";
+        } else {
+            json.error = "Dados não enviados!";
         }
         res.json(json);
     },

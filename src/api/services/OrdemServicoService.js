@@ -115,6 +115,22 @@ module.exports = {
         });
     },
 
+    alterarStatus: (idOrdemServico) => {
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                `UPDATE OrdemServico SET isFinalizada = true, isPaga = true WHERE idOrdemServico = ?`,
+                [idOrdemServico],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
+        });
+    },
+
     excluirOrdemServico: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
