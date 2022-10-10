@@ -211,7 +211,7 @@ module.exports = {
         let valor = req.params.valor;
 
         let clientes = await ClienteService.buscarPorNomeCliente(valor);
-        let veiculos = await VeiculoService.buscarPorPlaca(valor);
+        let veiculos = await VeiculoService.buscaPorValor(valor);
         let ordens = [];
 
         // Adicionar verificação para ver se valor é numérico

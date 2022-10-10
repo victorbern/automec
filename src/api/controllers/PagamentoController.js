@@ -174,6 +174,18 @@ module.exports = {
 
         let ordensServico = valores.ordensServico;
         let vendasDiretas = valores.vendasDiretas;
+        for (let i in ordensServico) {
+            if (
+                await OrdemServicoService.isPaga(
+                    ordensServico[i].idOrdemServico
+                )
+            ) {
+                json.error =
+                    "Alguma(s) desta(s) ordens de serviço já estão finalizadas";
+                res.json(json);
+                return;
+            }
+        }
         if (subtotal && total && formaPagamento) {
             let IdPagamento = await PagamentoService.inserirPagamento(
                 subtotal,
