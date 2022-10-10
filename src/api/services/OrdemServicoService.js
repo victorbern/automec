@@ -131,6 +131,22 @@ module.exports = {
         });
     },
 
+    isPaga: (idOrdemServico) => {
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                `SELECT isPaga FROM OrdemServico WHERE idOrdemServico = ?`,
+                [idOrdemServico],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
+        });
+    },
+
     excluirOrdemServico: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(

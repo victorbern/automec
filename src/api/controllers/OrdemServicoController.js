@@ -232,7 +232,10 @@ module.exports = {
                 veiculos[i].placaVeiculo
             );
             if (ordem) {
-                ordens.push(ordem);
+                // A função de buscaPorPlacaVeiculo busca vários veículos e não um só
+                for (let j in ordem) {
+                    ordens.push(ordem[j]);
+                }
             }
         }
         // json = this.adicionarOSJson(json, ordens);
