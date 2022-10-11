@@ -5,6 +5,7 @@ const PagamentoService = require("../services/PagamentoService");
 const VeiculoService = require("../services/VeiculoService");
 const VendaDiretaService = require("../services/VendaDiretaService");
 const qs = require("qs");
+const AppError = require("../errors/AppError");
 
 module.exports = {
     buscarTodos: async (req, res) => {
@@ -12,13 +13,15 @@ module.exports = {
 
         // Busca todos os pagamentos cadastrados no banco de dados
         let pagamentos = await PagamentoService.buscarTodos().catch((error) => {
-            json.error = error;
+            throw new AppError(error, 400);
         });
 
         // Caso nenhum pagamento seja encontrado, exibe como resultado um aviso dizendo isso
         if (!pagamentos) {
             json.result[0] =
                 "Não foram encontrados pagamentos com estes parâmetros";
+            res.json(json);
+            return;
         }
 
         // Paga cada pagamento encontrado, pegaremos seus dados específicos e adicionaremos ao json
@@ -43,7 +46,7 @@ module.exports = {
                 await PagamentoService.buscarDetalhePagamento(
                     pagamentos[i].idPagamento
                 ).catch((error) => {
-                    json.error = error;
+                    throw new AppError(error, 500);
                 });
 
             if (detalhePagamento) {
@@ -55,7 +58,7 @@ module.exports = {
                     ordemServico = await OrdemServicoService.buscarPorId(
                         detalhePagamento[j].idOrdemServico
                     ).catch((error) => {
-                        json.error = error;
+                        throw new AppError(error, 500);
                     });
                     if (ordemServico) {
                         // Buscamos no banco de dados os valores referentes ao cliente desta ordem de serviço especificada
@@ -96,12 +99,12 @@ module.exports = {
         let idPagamento = req.params.id;
 
         if (!idPagamento) {
-            json.error = "Campo id faltando";
+            throw new AppError("Campos não enviados", 400);
         }
 
         let pagamento = await PagamentoService.buscarPorId(idPagamento).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -131,7 +134,7 @@ module.exports = {
                 let ordemServico = await OrdemServicoService.buscarPorId(
                     detalhePagamento[i].idOrdemServico
                 ).catch((error) => {
-                    json.error = error;
+                    throw new AppError(error, 500);
                 });
                 if (ordemServico) {
                     let cliente = await ClienteService.buscarPorId(
@@ -180,10 +183,10 @@ module.exports = {
                     ordensServico[i].idOrdemServico
                 )
             ) {
-                json.error =
-                    "Alguma(s) desta(s) ordens de serviço já estão finalizadas";
-                res.json(json);
-                return;
+                throw new AppError(
+                    "Você está tentando pagar uma ordem de serviço já paga",
+                    400
+                );
             }
         }
         if (subtotal && total && formaPagamento) {
@@ -202,7 +205,7 @@ module.exports = {
                     await OrdemServicoService.alterarStatus(
                         ordensServico[i].idOrdemServico
                     ).catch((error) => {
-                        json.error = error;
+                        throw new AppError(error, 500);
                     });
                     await PagamentoService.inserirDetalhePagamento(
                         ordensServico[i].idOrdemServico,
@@ -231,7 +234,7 @@ module.exports = {
             }
             json.result = "Campos enviados";
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -264,7 +267,7 @@ module.exports = {
                 uf,
                 complemento
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             json.result = {
                 id,
@@ -279,7 +282,7 @@ module.exports = {
                 complemento,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -292,13 +295,13 @@ module.exports = {
 
         if (id) {
             await ClienteService.excluirCliente(id).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             json.result = {
                 id,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);

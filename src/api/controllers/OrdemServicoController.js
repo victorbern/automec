@@ -6,6 +6,7 @@ const ProdutoService = require("../services/ProdutoService");
 const VeiculoService = require("../services/VeiculoService");
 const FuncionarioService = require("../services/FuncionarioService");
 const ServicoService = require("../services/ServicoService");
+const AppError = require("../errors/AppError");
 
 module.exports = {
     // Busca todas as ordens de serviço no banco de dados
@@ -15,7 +16,7 @@ module.exports = {
 
         // Busca todas as ordens de serviços cadastradas no banco de dados
         let ordens = await OrdemServicoService.buscarTodos().catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
 
         // Se existir alguma ordem de serviço cadastrada, entra no if. Senão, devolve um json vazio.
@@ -28,22 +29,19 @@ module.exports = {
             let cliente = await ClienteService.buscarPorId(
                 ordens[i].idCliente
             ).catch((error) => {
-                json.result = "";
-                json.error = error;
+                throw new AppError(error, 500);
             });
             // Para cada ordem de serviço cadastrada, busca todos os dados do veiculo e salva na variável 'veiculo'
             let veiculo = await VeiculoService.buscaEspecificaPlaca(
                 ordens[i].placaVeiculo
             ).catch((error) => {
-                json.result = "";
-                json.error = error;
+                throw new AppError(error, 500);
             });
             // Busca os dados da tabela OSDetalhes para cada ordem de serviço
             let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
                 ordens[i].idOrdemServico
             ).catch((error) => {
-                json.result = "";
-                json.error = error;
+                throw new AppError(error, 500);
             });
             let vendas, executaFuncao;
             if (osDetalhes) {
@@ -122,7 +120,7 @@ module.exports = {
         let idOrdemServico = req.params.id;
 
         if (!idOrdemServico) {
-            json.error = "Campo id faltante";
+            throw new AppError("Campo id faltante", 400);
         }
         // Busca a ordem de serviço que possui aquele id e salva na variável 'ordem'
         let ordem = await OrdemServicoService.buscarPorId(idOrdemServico);
@@ -332,7 +330,7 @@ module.exports = {
                 total,
                 km
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             if (idOrdemServico) {
                 let idOSDetalhes = await OrdemServicoService.inserirOSDetalhes(
@@ -350,13 +348,13 @@ module.exports = {
                             quantidadeVendida,
                             precoTotal
                         ).catch((error) => {
-                            json.error = error;
+                            throw new AppError(error, 500);
                         });
                         await ProdutoService.alterarEstoque(
                             idProduto,
                             quantidadeVendida * -1
                         ).catch((error) => {
-                            json.error = error;
+                            throw new AppError(error, 500);
                         });
                     }
                 }
@@ -371,14 +369,14 @@ module.exports = {
                             observacao,
                             idOSDetalhes
                         ).catch((error) => {
-                            json.error = error;
+                            throw new AppError(error, 500);
                         });
                     }
                 }
             }
             json.result = "Dados enviados";
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
         res.json(json);
     },
@@ -406,7 +404,7 @@ module.exports = {
                 total,
                 km
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }); // Altera os dados da ordem de serviço
             let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
                 idOrdemServico
@@ -544,7 +542,7 @@ module.exports = {
             }
             json.result = "Dados enviados";
         } else {
-            json.error = "Dados não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -587,7 +585,7 @@ module.exports = {
                 await OrdemServicoService.excluirOSDetalhes(
                     osDetalhes.idOSDetalhes
                 ).catch((error) => {
-                    json.error = error;
+                    throw new AppError(error, 500);
                 });
             }
 
@@ -595,7 +593,7 @@ module.exports = {
 
             json.result = "Campos enviados";
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);

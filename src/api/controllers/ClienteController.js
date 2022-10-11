@@ -1,11 +1,12 @@
 const { json } = require("body-parser");
+const AppError = require("../errors/AppError");
 const ClienteService = require("../services/ClienteService");
 
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "Teste", result: [] };
         let clientes = await ClienteService.buscarTodos().catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
 
         for (let i in clientes) {
@@ -30,7 +31,7 @@ module.exports = {
         let json = { error: "", result: {} };
         let id = req.params.id;
         let cliente = await ClienteService.buscarPorId(id).catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
 
         if (cliente) {
@@ -45,7 +46,7 @@ module.exports = {
         let valor = req.params.valor;
         let clientes = await ClienteService.buscaPorValor(valor).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -92,7 +93,7 @@ module.exports = {
                 uf,
                 complemento
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
 
             json.result = {
@@ -108,7 +109,7 @@ module.exports = {
                 complemento,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -141,7 +142,7 @@ module.exports = {
                 uf,
                 complemento
             ).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             json.result = {
                 id,
@@ -156,7 +157,7 @@ module.exports = {
                 complemento,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -169,13 +170,13 @@ module.exports = {
 
         if (id) {
             await ClienteService.excluirCliente(id).catch((error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             });
             json.result = {
                 id,
             };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);

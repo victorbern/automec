@@ -1,11 +1,12 @@
 const { json } = require("body-parser");
+const AppError = require("../errors/AppError");
 const ProdutoService = require("../services/ProdutoService");
 
 module.exports = {
     buscarTodos: async (req, res) => {
         let json = { error: "", result: [] };
         let produtos = await ProdutoService.buscarTodos().catch((error) => {
-            json.error = error;
+            throw new AppError(error, 500);
         });
 
         for (let i in produtos) {
@@ -27,7 +28,7 @@ module.exports = {
         let idProduto = req.params.id;
         let produto = await ProdutoService.buscarPorId(idProduto).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -43,7 +44,7 @@ module.exports = {
         let valor = req.params.valor;
         let produtos = await ProdutoService.buscaPorValor(valor).catch(
             (error) => {
-                json.error = error;
+                throw new AppError(error, 500);
             }
         );
 
@@ -77,22 +78,19 @@ module.exports = {
                 valorCusto,
                 quantidadeEstoque,
                 precoVenda
-            )
-                .then(() => {
-                    json.result = {
-                        idProduto: IdProduto,
-                        codigoBarras,
-                        descricao,
-                        valorCusto,
-                        quantidadeEstoque,
-                        precoVenda,
-                    };
-                })
-                .catch((error) => {
-                    json.error = error;
-                });
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = {
+                idProduto: IdProduto,
+                codigoBarras,
+                descricao,
+                valorCusto,
+                quantidadeEstoque,
+                precoVenda,
+            };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -107,16 +105,13 @@ module.exports = {
         let quantidadeEstoque = await ProdutoService.alterarEstoque(
             id,
             valorAlteracao
-        )
-            .then(() => {
-                json.result = {
-                    idProduto: id,
-                    quantidadeEstoque: quantidadeEstoque,
-                };
-            })
-            .catch((error) => {
-                json.error = error;
-            });
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
+        json.result = {
+            idProduto: id,
+            quantidadeEstoque: quantidadeEstoque,
+        };
         res.json(json);
     },
 
@@ -138,22 +133,19 @@ module.exports = {
                 valorCusto,
                 quantidadeEstoque,
                 precoVenda
-            )
-                .then(() => {
-                    json.result = {
-                        idProduto,
-                        codigoBarras,
-                        descricao,
-                        valorCusto,
-                        quantidadeEstoque,
-                        precoVenda,
-                    };
-                })
-                .catch((error) => {
-                    json.error = error;
-                });
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = {
+                idProduto,
+                codigoBarras,
+                descricao,
+                valorCusto,
+                quantidadeEstoque,
+                precoVenda,
+            };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
@@ -165,17 +157,14 @@ module.exports = {
         let id = req.params.id;
 
         if (id) {
-            await ProdutoService.excluirProduto(id)
-                .then(() => {
-                    json.result = {
-                        id,
-                    };
-                })
-                .catch((error) => {
-                    json.error = error;
-                });
+            await ProdutoService.excluirProduto(id).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            json.result = {
+                id,
+            };
         } else {
-            json.error = "Campos não enviados";
+            throw new AppError("Campos não enviados", 400);
         }
 
         res.json(json);
