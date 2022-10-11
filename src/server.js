@@ -18,6 +18,7 @@ app.get("/", (req, res) => res.send("Aplicação Rodando!"));
 
 app.use((error, req, res, next) => {
     if (error && error.statusCode) {
+        console.log(error.message);
         return res.status(error.statusCode).json({
             status: error.statusCode,
             message: error.message,

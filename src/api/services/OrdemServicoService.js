@@ -47,7 +47,7 @@ module.exports = {
                         return;
                     }
                     if (results.length > 0) {
-                        aceito(results[0]);
+                        aceito(results);
                     } else {
                         aceito(false);
                     }

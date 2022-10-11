@@ -179,9 +179,9 @@ module.exports = {
         let vendasDiretas = valores.vendasDiretas;
         for (let i in ordensServico) {
             if (
-                await OrdemServicoService.isPaga(
+                !(await OrdemServicoService.isPaga(
                     ordensServico[i].idOrdemServico
-                )
+                ))
             ) {
                 throw new AppError(
                     "Você está tentando pagar uma ordem de serviço já paga",
@@ -240,47 +240,38 @@ module.exports = {
         res.json(json);
     },
 
-    alterarCliente: async (req, res) => {
+    alterarPagamento: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let id = req.params.id;
-        let nomeCliente = req.body.nomeCliente;
-        let cpfCnpj = req.body.cpfCnpj;
-        let celularCliente = req.body.celularCliente;
-        let cep = req.body.cep;
-        let endereco = req.body.endereco;
-        let numero = req.body.numero;
-        let cidade = req.body.cidade;
-        let uf = req.body.uf;
-        let complemento = req.body.complemento;
+        let valores = req.body;
+        valores = qs.parse(valores);
 
-        if (nomeCliente && celularCliente && cpfCnpj && id) {
-            await ClienteService.alterarCliente(
-                id,
-                nomeCliente,
-                cpfCnpj,
-                celularCliente,
-                cep,
-                endereco,
-                numero,
-                cidade,
-                uf,
-                complemento
+        let idPagamento = req.params.id;
+        let subtotal = valores.subtotal;
+        let total = valores.total;
+        let formaPagamento = valores.formaPagamento;
+        let desconto = valores.desconto;
+        let ordensServico = valores.ordensServico;
+        let vendasDiretas = valores.vendasDiretas;
+
+        if (subtotal && total && formaPagamento) {
+            await PagamentoService.alterarPagamento(
+                idPagamento,
+                subtotal,
+                total,
+                desconto,
+                formaPagamento
             ).catch((error) => {
                 throw new AppError(error, 500);
             });
-            json.result = {
-                id,
-                nomeCliente,
-                cpfCnpj,
-                celularCliente,
-                cep,
-                endereco,
-                numero,
-                cidade,
-                uf,
-                complemento,
-            };
+            let detalhePagamento =
+                await PagamentoService.buscarDetalhePagamento(
+                    idPagamento
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
+            for (let i in detalhePagamento) {
+            }
         } else {
             throw new AppError("Campos não enviados", 400);
         }

@@ -217,14 +217,18 @@ module.exports = {
         if (ordem) {
             ordens.push(ordem);
         }
+        // console.log(clientes);
         for (let i in clientes) {
             ordem = await OrdemServicoService.buscaPorIdCliente(
                 clientes[i].idCliente
             );
             if (ordem) {
-                ordens.push(ordem);
+                for (let j in ordem) {
+                    ordens.push(ordem[j]);
+                }
             }
         }
+        console.log(ordem);
         for (let i in veiculos) {
             ordem = await OrdemServicoService.buscaPorPlacaVeiculo(
                 veiculos[i].placaVeiculo
