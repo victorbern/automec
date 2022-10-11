@@ -4,7 +4,7 @@ module.exports = {
     buscarTodos: () => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQuery(
-                `SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, cidade, uf, complemento FROM Cliente`,
+                `SELECT idPagamento, subtotal, total, formaPagamento, desconto, dataHora FROM Pagamento`,
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -16,12 +16,11 @@ module.exports = {
         });
     },
 
-    buscarPorId: (id) => {
+    buscarPorId: (idPagamento) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero, 
-                    cidade, uf, complemento FROM Cliente WHERE Cliente.idCliente = ?`,
-                [id],
+                `SELECT idPagamento, dataHora, subtotal, total, desconto, formaPagamento FROM Pagamento WHERE idPagamento = ?`,
+                [idPagamento],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -37,76 +36,11 @@ module.exports = {
         });
     },
 
-    buscarPorNomeCliente: (nomeCliente) => {
-        nomeCliente = "%" + nomeCliente + "%";
+    inserirPagamento: (subtotal, total, formaPagamento, desconto) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
-                    "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ?",
-                [nomeCliente],
-                (error, results) => {
-                    if (error) {
-                        rejeitado(error);
-                        return;
-                    }
-                    if (results.length > 0) {
-                        aceito(results);
-                    } else {
-                        aceito(false);
-                    }
-                }
-            );
-        });
-    },
-
-    buscaPorValor: (valor) => {
-        valor = "%" + valor + "%";
-        return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
-                "SELECT idCliente, nomeCliente, cpfCnpj, celularCliente, cep, endereco, numero," +
-                    "cidade, uf, complemento FROM Cliente WHERE nomeCliente like ? OR cpfCnpj like ?",
-                [valor, valor],
-                (error, results) => {
-                    if (error) {
-                        rejeitado(error);
-                        return;
-                    }
-                    if (results.length > 0) {
-                        aceito(results);
-                    } else {
-                        aceito(false);
-                    }
-                }
-            );
-        });
-    },
-
-    inserirCliente: (
-        nomeCliente,
-        cpfCnpj,
-        celularCliente,
-        cep,
-        endereco,
-        numero,
-        cidade,
-        uf,
-        complemento
-    ) => {
-        return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
-                `INSERT INTO Cliente (nomeCliente, cpfCnpj, celularCliente, cep,` +
-                    `endereco, numero, cidade, uf, complemento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    nomeCliente,
-                    cpfCnpj,
-                    celularCliente,
-                    cep,
-                    endereco,
-                    numero,
-                    cidade,
-                    uf,
-                    complemento,
-                ],
+                `INSERT INTO Pagamento (subtotal, total, formaPagamento, desconto, dataHora) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP())`,
+                [subtotal, total, formaPagamento, desconto],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -168,6 +102,40 @@ module.exports = {
                         return;
                     }
                     aceito(results);
+                }
+            );
+        });
+    },
+
+    // Classe Detalhe Pagamento
+
+    buscarDetalhePagamento: (idPagamento) => {
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                "SELECT idDetalhePagamento, idOrdemServico, idPagamento FROM DetalhePagamento WHERE idPagamento = ?",
+                [idPagamento],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results);
+                }
+            );
+        });
+    },
+
+    inserirDetalhePagamento: (idOrdemServico, idPagamento) => {
+        return new Promise((aceito, rejeitado) => {
+            db.executeSQLQueryParams(
+                `INSERT INTO DetalhePagamento (idOrdemServico, idPagamento) VALUES (?, ?)`,
+                [idOrdemServico, idPagamento],
+                (error, results) => {
+                    if (error) {
+                        rejeitado(error);
+                        return;
+                    }
+                    aceito(results.insertId);
                 }
             );
         });
