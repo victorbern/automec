@@ -7,6 +7,7 @@ const VeiculoService = require("../services/VeiculoService");
 const FuncionarioService = require("../services/FuncionarioService");
 const ServicoService = require("../services/ServicoService");
 const AppError = require("../errors/AppError");
+const ValorNuloError = require("../errors/ValorNuloError");
 
 module.exports = {
     // Busca todas as ordens de serviço no banco de dados
@@ -60,14 +61,15 @@ module.exports = {
             if (vendas) {
                 for (let i in vendas) {
                     // Para cada venda cadastrada, busca todos os dados de produto e salva na variável 'produto'
-                    let produto = await ProdutoService.buscarPorId(
-                        vendas[i].idProduto
-                    );
+                    let produto =
+                        await ProdutoService.buscaEspecificaCodigoBarras(
+                            vendas[i].codigoBarras
+                        );
                     produtos.push({
-                        idProduto: vendas[i].idProduto,
                         codigoBarras: produto.codigoBarras,
                         descricao: produto.descricao,
                         quantidadeVendida: vendas[i].quantidadeVendida,
+                        precoUnitario: vendas[i].precoUnitario,
                         precoTotal: vendas[i].precoTotal,
                     });
                 }
@@ -154,11 +156,10 @@ module.exports = {
         let produtos = [];
         if (vendas) {
             for (let i in vendas) {
-                let produto = await ProdutoService.buscarPorId(
-                    vendas[i].idProduto
+                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+                    vendas[i].codigoBarras
                 );
                 produtos.push({
-                    idProduto: vendas[i].idProduto,
                     codigoBarras: produto.codigoBarras,
                     descricao: produto.descricao,
                     quantidadeVendida: vendas[i].quantidadeVendida,
@@ -217,7 +218,6 @@ module.exports = {
         if (ordem) {
             ordens.push(ordem);
         }
-        // console.log(clientes);
         for (let i in clientes) {
             ordem = await OrdemServicoService.buscaPorIdCliente(
                 clientes[i].idCliente
@@ -228,7 +228,6 @@ module.exports = {
                 }
             }
         }
-        console.log(ordem);
         for (let i in veiculos) {
             ordem = await OrdemServicoService.buscaPorPlacaVeiculo(
                 veiculos[i].placaVeiculo
@@ -267,11 +266,11 @@ module.exports = {
             let produtos = [];
             if (vendas) {
                 for (let i in vendas) {
-                    let produto = await ProdutoService.buscarPorId(
-                        vendas[i].idProduto
-                    );
+                    let produto =
+                        await ProdutoService.buscaEspecificaCodigoBarras(
+                            vendas[i].codigoBarras
+                        );
                     produtos.push({
-                        idProduto: vendas[i].idProduto,
                         codigoBarras: produto.codigoBarras,
                         descricao: produto.descricao,
                         quantidadeVendida: vendas[i].quantidadeVendida,
@@ -326,7 +325,15 @@ module.exports = {
         let placaVeiculo = valores.placaVeiculo;
         let total = valores.total;
         let km = valores.km;
-
+        if (!idCliente) {
+            throw new AppError("O campo id do cliente não pode ser nulo", 400);
+        }
+        if (!placaVeiculo) {
+            throw new AppError(
+                "O campo placa do veículo não pode ser nulo",
+                400
+            );
+        }
         if (idCliente && placaVeiculo) {
             let idOrdemServico = await OrdemServicoService.inserirOrdemServico(
                 idCliente,
@@ -334,7 +341,10 @@ module.exports = {
                 total,
                 km
             ).catch((error) => {
-                throw new AppError(error, 500);
+                throw new AppError(
+                    "Erro ao inserir uma nova ordem de serviço: " + error,
+                    500
+                );
             });
             if (idOrdemServico) {
                 let idOSDetalhes = await OrdemServicoService.inserirOSDetalhes(
@@ -342,23 +352,45 @@ module.exports = {
                 );
                 if (valores.produtos) {
                     for (let i in valores.produtos) {
-                        let idProduto = valores.produtos[i].idProduto * 1;
+                        let codigoBarras = valores.produtos[i].codigoBarras;
                         let quantidadeVendida =
                             valores.produtos[i].quantidadeVendida * 1;
                         let precoTotal = valores.produtos[i].precoTotal * 1;
+                        let precoUnitario =
+                            valores.produtos[i].precoUnitario * 1;
+                        if (
+                            !codigoBarras ||
+                            !quantidadeVendida ||
+                            !precoTotal ||
+                            !precoUnitario
+                        ) {
+                            console.log(
+                                "Um dos campos do produto " + i + " é nulo"
+                            );
+                            break;
+                        }
                         await OrdemServicoService.inserirProdutoHasOSDetalhes(
-                            idProduto,
+                            codigoBarras,
                             idOSDetalhes,
                             quantidadeVendida,
-                            precoTotal
+                            precoTotal,
+                            precoUnitario
                         ).catch((error) => {
-                            throw new AppError(error, 500);
+                            throw new AppError(
+                                `Erro ao inserir produto da posição ${i}. ` +
+                                    error,
+                                500
+                            );
                         });
                         await ProdutoService.alterarEstoque(
-                            idProduto,
+                            codigoBarras,
                             quantidadeVendida * -1
                         ).catch((error) => {
-                            throw new AppError(error, 500);
+                            throw new AppError(
+                                `Erro ao alterar estoque do produto ${i}. ` +
+                                    error,
+                                500
+                            );
                         });
                     }
                 }
@@ -367,13 +399,23 @@ module.exports = {
                         let idServico = valores.servicos[i].idServico;
                         let idFuncionario = valores.servicos[i].idFuncionario;
                         let observacao = valores.servicos[i].observacao;
+                        if (!idServico || !idFuncionario) {
+                            console.log(
+                                "Um dos campos do produto " + i + " é nulo"
+                            );
+                            // break;
+                        }
                         await OrdemServicoService.inserirExecutaFuncao(
                             idServico,
                             idFuncionario,
                             observacao,
                             idOSDetalhes
                         ).catch((error) => {
-                            throw new AppError(error, 500);
+                            throw new AppError(
+                                `Erro ao inserir o serviço da posição ${i}. ` +
+                                    error,
+                                500
+                            );
                         });
                     }
                 }
@@ -423,7 +465,7 @@ module.exports = {
                 if (vendas) {
                     for (let i in vendas) {
                         produtosCadastrados.push({
-                            idProduto: vendas[i].idProduto,
+                            codigoBarras: vendas[i].codigoBarras,
                             quantidadeVendida: vendas[i].quantidadeVendida,
                             precoTotal: vendas[i].precoTotal,
                         });
@@ -436,8 +478,8 @@ module.exports = {
                             let produtoExiste = false;
                             for (let j in produtos) {
                                 if (
-                                    produtosCadastrados[i].idProduto ==
-                                    produtos[j].idProduto
+                                    produtosCadastrados[i].codigoBarras ==
+                                    produtos[j].codigoBarras
                                 ) {
                                     produtoExiste = true;
                                 }
@@ -445,7 +487,7 @@ module.exports = {
                             if (!produtoExiste) {
                                 await OrdemServicoService.excluirProdutoOSDetalhes(
                                     osDetalhes.idOSDetalhes,
-                                    produtosCadastrados[i].idProduto
+                                    produtosCadastrados[i].codigoBarras
                                 );
                             }
                         }
@@ -453,11 +495,11 @@ module.exports = {
                             let venda =
                                 await OrdemServicoService.buscarProdutoOSDetalhes(
                                     osDetalhes.idOSDetalhes,
-                                    produtos[i].idProduto
+                                    produtos[i].codigoBarras
                                 );
                             if (!venda) {
                                 await OrdemServicoService.inserirProdutoHasOSDetalhes(
-                                    produtos[i].idProduto,
+                                    produtos[i].codigoBarras,
                                     osDetalhes.idOSDetalhes,
                                     produtos[i].quantidadeVendida,
                                     produtos[i].precoTotal

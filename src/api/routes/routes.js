@@ -28,11 +28,11 @@ router.get("/funcionarios/:valor", FuncionarioController.buscaPorValor); // Busc
 
 // APIs para produtos
 router.get("/produtos", ProdutoController.buscarTodos);
-router.get("/produto/:id", ProdutoController.buscarPorId);
+router.get("/produto/:codigoBarras", ProdutoController.buscarPorCodigoBarras);
 router.post("/produto", ProdutoController.inserirProduto);
-router.put("/produto/:id", ProdutoController.alterarProduto);
-router.put("/alterar-estoque/:id", ProdutoController.alterarEstoque);
-router.delete("/produto/:id", ProdutoController.excluirProduto);
+router.put("/produto/:codigoBarras", ProdutoController.alterarProduto);
+router.put("/alterar-estoque/:codigoBarras", ProdutoController.alterarEstoque);
+router.delete("/produto/:codigoBarras", ProdutoController.excluirProduto);
 router.get("/produtos/:valor", ProdutoController.buscaPorValor); // Buscar produto por descricao ou por código de barras
 
 // APIs para veículos

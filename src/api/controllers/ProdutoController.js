@@ -11,7 +11,6 @@ module.exports = {
 
         for (let i in produtos) {
             json.result.push({
-                idProduto: produtos[i].idProduto,
                 codigoBarras: produtos[i].codigoBarras,
                 descricao: produtos[i].descricao,
                 valorCurto: produtos[i].valorCusto,
@@ -23,14 +22,14 @@ module.exports = {
         res.json(json);
     },
 
-    buscarPorId: async (req, res) => {
+    buscarPorCodigoBarras: async (req, res) => {
         let json = { error: "", result: {} };
-        let idProduto = req.params.id;
-        let produto = await ProdutoService.buscarPorId(idProduto).catch(
-            (error) => {
-                throw new AppError(error, 500);
-            }
-        );
+        let codigoBarras = req.params.codigoBarras;
+        let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+            codigoBarras
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
 
         if (produto) {
             json.result = produto;
@@ -50,7 +49,6 @@ module.exports = {
 
         for (let i in produtos) {
             json.result.push({
-                idProduto: produtos[i].idProduto,
                 codigoBarras: produtos[i].codigoBarras,
                 descricao: produtos[i].descricao,
                 valorCusto: produtos[i].valorCusto,
@@ -72,7 +70,7 @@ module.exports = {
         let precoVenda = req.body.precoVenda;
 
         if (codigoBarras && descricao && precoVenda) {
-            let IdProduto = await ProdutoService.inserirProduto(
+            await ProdutoService.inserirProduto(
                 codigoBarras,
                 descricao,
                 valorCusto,
@@ -82,7 +80,6 @@ module.exports = {
                 throw new AppError(error, 500);
             });
             json.result = {
-                idProduto: IdProduto,
                 codigoBarras,
                 descricao,
                 valorCusto,
@@ -99,49 +96,39 @@ module.exports = {
     alterarEstoque: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let id = req.params.id;
+        let codigoBarras = req.params.codigoBarras;
         let valorAlteracao = req.body.valorAlteracao;
 
-        let quantidadeEstoque = await ProdutoService.alterarEstoque(
-            id,
-            valorAlteracao
-        ).catch((error) => {
-            throw new AppError(error, 500);
-        });
-        json.result = {
-            idProduto: id,
-            quantidadeEstoque: quantidadeEstoque,
-        };
+        await ProdutoService.alterarEstoque(codigoBarras, valorAlteracao).catch(
+            (error) => {
+                throw new AppError(error, 500);
+            }
+        );
+        json.result = "Estoque alterado com sucesso!";
         res.json(json);
     },
 
     alterarProduto: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let idProduto = req.params.id;
-        let codigoBarras = req.body.codigoBarras;
+        let codigoBarras = req.params.codigoBarras;
         let descricao = req.body.descricao;
         let valorCusto = req.body.valorCusto;
-        let quantidadeEstoque = req.body.quantidadeEstoque;
         let precoVenda = req.body.precoVenda;
 
-        if (codigoBarras && descricao && precoVenda && idProduto) {
+        if (codigoBarras && descricao && valorCusto && precoVenda) {
             await ProdutoService.alterarProduto(
-                idProduto,
                 codigoBarras,
                 descricao,
                 valorCusto,
-                quantidadeEstoque,
                 precoVenda
             ).catch((error) => {
                 throw new AppError(error, 500);
             });
             json.result = {
-                idProduto,
                 codigoBarras,
                 descricao,
                 valorCusto,
-                quantidadeEstoque,
                 precoVenda,
             };
         } else {
@@ -154,15 +141,13 @@ module.exports = {
     excluirProduto: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let id = req.params.id;
+        let codigoBarras = req.params.codigoBarras;
 
-        if (id) {
-            await ProdutoService.excluirProduto(id).catch((error) => {
+        if (codigoBarras) {
+            await ProdutoService.excluirProduto(codigoBarras).catch((error) => {
                 throw new AppError(error, 500);
             });
-            json.result = {
-                id,
-            };
+            json.result = "Produto excluido com sucesso!";
         } else {
             throw new AppError("Campos não enviados", 400);
         }

@@ -17,6 +17,9 @@ app.use("/api", routes);
 app.get("/", (req, res) => res.send("Aplicação Rodando!"));
 
 app.use((error, req, res, next) => {
+    if (error && error.nomeVariavel) {
+        next();
+    }
     if (error && error.statusCode) {
         console.log(error.message);
         return res.status(error.statusCode).json({
@@ -24,7 +27,6 @@ app.use((error, req, res, next) => {
             message: error.message,
         });
     }
-
     console.log(error);
 
     return res.status(500).json({

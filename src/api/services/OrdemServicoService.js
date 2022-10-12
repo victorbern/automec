@@ -77,9 +77,9 @@ module.exports = {
         });
     },
 
-    inserirOrdemServico: (idCliente, placaVeiculo, total, km) => {
+    inserirOrdemServico: (idCliente, placaVeiculo, total, km, conexao) => {
         return new Promise((aceito, rejeitado) => {
-            db.executeSQLQueryParams(
+            conexao.attachTransaction(
                 `INSERT INTO OrdemServico (idCliente, placaVeiculo, total, km) VALUES (?, ?, ?, ?)`,
                 [idCliente, placaVeiculo, total, km],
                 (error, results) => {
@@ -216,15 +216,22 @@ module.exports = {
     },
 
     inserirProdutoHasOSDetalhes: (
-        idProduto,
+        codigoBarras,
         idOSDetalhes,
         quantidadeVendida,
-        precoTotal
+        precoTotal,
+        precoUnitario
     ) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `INSERT INTO Produto_has_OSDetalhes (idProduto, idOSDetalhes, quantidadeVendida, precoTotal) VALUES (?, ?, ?, ?)`,
-                [idProduto, idOSDetalhes, quantidadeVendida, precoTotal],
+                `INSERT INTO Produto_has_OSDetalhes (codigoBarras, idOSDetalhes, quantidadeVendida, precoTotal, precoUnitario) VALUES (?, ?, ?, ?, ?)`,
+                [
+                    codigoBarras,
+                    idOSDetalhes,
+                    quantidadeVendida,
+                    precoTotal,
+                    precoUnitario,
+                ],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -239,7 +246,7 @@ module.exports = {
     buscarVendaPorOSDetalhes: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT idProduto, quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?",
+                "SELECT codigoBarras, quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?",
                 [idOSDetalhes],
                 (error, results) => {
                     if (error) {
@@ -256,11 +263,11 @@ module.exports = {
         });
     },
 
-    buscarProdutoOSDetalhes: (idOSDetalhes, idProduto) => {
+    buscarProdutoOSDetalhes: (idOSDetalhes, codigoBarras) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?",
-                [idOSDetalhes, idProduto],
+                "SELECT quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && codigoBarras = ?",
+                [idOSDetalhes, codigoBarras],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
@@ -298,11 +305,11 @@ module.exports = {
         });
     },
 
-    excluirProdutoOSDetalhes: (idOSDetalhes, idProduto) => {
+    excluirProdutoOSDetalhes: (idOSDetalhes, codigoBarras) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "DELETE FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && idProduto = ?",
-                [idOSDetalhes, idProduto],
+                "DELETE FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && codigoBarras = ?",
+                [idOSDetalhes, codigoBarras],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
