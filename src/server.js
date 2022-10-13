@@ -8,7 +8,6 @@ let dados = require("./database");
 const app = express();
 
 const routes = require("./api/routes/routes");
-const AppError = require("./api/errors/AppError");
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -17,9 +16,6 @@ app.use("/api", routes);
 app.get("/", (req, res) => res.send("Aplicação Rodando!"));
 
 app.use((error, req, res, next) => {
-    if (error && error.nomeVariavel) {
-        next();
-    }
     if (error && error.statusCode) {
         console.log(error.message);
         return res.status(error.statusCode).json({

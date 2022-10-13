@@ -79,7 +79,7 @@ module.exports = {
 
     inserirOrdemServico: (idCliente, placaVeiculo, total, km, conexao) => {
         return new Promise((aceito, rejeitado) => {
-            conexao.attachTransaction(
+            db.executeSQLQueryParams(
                 `INSERT INTO OrdemServico (idCliente, placaVeiculo, total, km) VALUES (?, ?, ?, ?)`,
                 [idCliente, placaVeiculo, total, km],
                 (error, results) => {
@@ -163,7 +163,7 @@ module.exports = {
         });
     },
 
-    inserirOSDetalhes: (idOrdemServico) => {
+    inserirOSDetalhes: (idOrdemServico, conexao) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
                 `INSERT INTO OSDetalhes (idOrdemServico, dataOS) VALUES (?, CURDATE())`,

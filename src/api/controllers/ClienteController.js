@@ -15,9 +15,11 @@ module.exports = {
                 nomeCliente: clientes[i].nomeCliente,
                 cpfCnpj: clientes[i].cpfCnpj,
                 celularCliente: clientes[i].celularCliente,
+                telefoneCliente: clientes[i].telefoneCliente,
                 cep: clientes[i].cep,
                 endereco: clientes[i].endereco,
                 numero: clientes[i].numero,
+                bairro: clientes[i].bairro,
                 cidade: clientes[i].cidade,
                 uf: clientes[i].uf,
                 complemento: clientes[i].complemento,
@@ -56,9 +58,11 @@ module.exports = {
                 nomeCliente: clientes[i].nomeCliente,
                 cpfCnpj: clientes[i].cpfCnpj,
                 celularCliente: clientes[i].celularCliente,
+                telefoneCliente: clientes[i].telefoneCliente,
                 cep: clientes[i].cep,
                 endereco: clientes[i].endereco,
                 numero: clientes[i].numero,
+                bairro: clientes[i].bairro,
                 cidade: clientes[i].cidade,
                 uf: clientes[i].uf,
                 complemento: clientes[i].complemento,
@@ -74,9 +78,11 @@ module.exports = {
         let nomeCliente = req.body.nomeCliente;
         let cpfCnpj = req.body.cpfCnpj;
         let celularCliente = req.body.celularCliente;
+        let telefoneCliente = req.body.telefoneCliente;
         let cep = req.body.cep;
         let endereco = req.body.endereco;
         let numero = req.body.numero;
+        let bairro = req.body.bairro;
         let cidade = req.body.cidade;
         let uf = req.body.uf;
         let complemento = req.body.complemento;
@@ -86,9 +92,11 @@ module.exports = {
                 nomeCliente,
                 cpfCnpj,
                 celularCliente,
+                telefoneCliente,
                 cep,
                 endereco,
                 numero,
+                bairro,
                 cidade,
                 uf,
                 complemento
@@ -101,9 +109,11 @@ module.exports = {
                 nomeCliente,
                 cpfCnpj,
                 celularCliente,
+                telefoneCliente,
                 cep,
                 endereco,
                 numero,
+                bairro,
                 cidade,
                 uf,
                 complemento,
@@ -122,9 +132,11 @@ module.exports = {
         let nomeCliente = req.body.nomeCliente;
         let cpfCnpj = req.body.cpfCnpj;
         let celularCliente = req.body.celularCliente;
+        let telefoneCliente = req.body.telefoneCliente;
         let cep = req.body.cep;
         let endereco = req.body.endereco;
         let numero = req.body.numero;
+        let bairro = req.body.bairro;
         let cidade = req.body.cidade;
         let uf = req.body.uf;
         let complemento = req.body.complemento;
@@ -135,9 +147,11 @@ module.exports = {
                 nomeCliente,
                 cpfCnpj,
                 celularCliente,
+                telefoneCliente,
                 cep,
                 endereco,
                 numero,
+                bairro,
                 cidade,
                 uf,
                 complemento
@@ -149,9 +163,11 @@ module.exports = {
                 nomeCliente,
                 cpfCnpj,
                 celularCliente,
+                telefoneCliente,
                 cep,
                 endereco,
                 numero,
+                bairro,
                 cidade,
                 uf,
                 complemento,

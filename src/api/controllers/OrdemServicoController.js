@@ -7,14 +7,12 @@ const VeiculoService = require("../services/VeiculoService");
 const FuncionarioService = require("../services/FuncionarioService");
 const ServicoService = require("../services/ServicoService");
 const AppError = require("../errors/AppError");
-const ValorNuloError = require("../errors/ValorNuloError");
 
 module.exports = {
     // Busca todas as ordens de serviço no banco de dados
     buscarTodos: async (req, res) => {
         // Cria o json que será devolvido no response
         let json = { error: "", result: [] };
-
         // Busca todas as ordens de serviços cadastradas no banco de dados
         let ordens = await OrdemServicoService.buscarTodos().catch((error) => {
             throw new AppError(error, 500);
@@ -163,6 +161,7 @@ module.exports = {
                     codigoBarras: produto.codigoBarras,
                     descricao: produto.descricao,
                     quantidadeVendida: vendas[i].quantidadeVendida,
+                    precoUnitario: vendas[i].precoUnitario,
                     precoTotal: produto.precoTotal,
                 });
             }
@@ -274,6 +273,7 @@ module.exports = {
                         codigoBarras: produto.codigoBarras,
                         descricao: produto.descricao,
                         quantidadeVendida: vendas[i].quantidadeVendida,
+                        precoUnitario: vendas[i].precoUnitario,
                         precoTotal: vendas[i].precoTotal,
                     });
                 }
@@ -325,6 +325,81 @@ module.exports = {
         let placaVeiculo = valores.placaVeiculo;
         let total = valores.total;
         let km = valores.km;
+
+        // Verificar se todos os valores de produtos estão certos
+
+        if (valores.produtos) {
+            for (let i in valores.produtos) {
+                let codigoBarras = valores.produtos[i].codigoBarras;
+                let quantidadeVendida =
+                    valores.produtos[i].quantidadeVendida * 1;
+                let precoTotal = valores.produtos[i].precoTotal * 1;
+                let precoUnitario = valores.produtos[i].precoUnitario * 1;
+
+                if (
+                    !codigoBarras ||
+                    !quantidadeVendida ||
+                    !precoTotal ||
+                    !precoUnitario
+                ) {
+                    throw new AppError(
+                        "Um dos campos em produtos na posição " +
+                            i +
+                            " é nulo.",
+                        400
+                    );
+                }
+
+                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+                    codigoBarras
+                );
+
+                if (!produto) {
+                    throw new AppError(
+                        "O código de barras para o produto especificado não existe!",
+                        400
+                    );
+                }
+            }
+        }
+
+        // Verificar se todos os valores de produtos estão certos
+
+        if (valores.servicos) {
+            for (let i in valores.servicos) {
+                let idServico = valores.servicos[i].idServico;
+                let idFuncionario = valores.servicos[i].idFuncionario;
+                if (!idServico || !idFuncionario) {
+                    throw new AppError(
+                        "Um dos campos em produtos na posição " +
+                            i +
+                            " é nulo.",
+                        400
+                    );
+                }
+
+                let servico = await ServicoService.buscarPorId(idServico);
+
+                let funcionario = await FuncionarioService.buscarPorId(
+                    idFuncionario
+                );
+
+                if (!servico) {
+                    throw new AppError(
+                        "O id para o serviço especificado não existe!",
+                        400
+                    );
+                }
+
+                if (!funcionario) {
+                    throw new AppError(
+                        "O id para o funcionário especificado não existe!",
+                        400
+                    );
+                }
+            }
+        }
+
         if (!idCliente) {
             throw new AppError("O campo id do cliente não pode ser nulo", 400);
         }
@@ -334,6 +409,7 @@ module.exports = {
                 400
             );
         }
+
         if (idCliente && placaVeiculo) {
             let idOrdemServico = await OrdemServicoService.inserirOrdemServico(
                 idCliente,
@@ -358,17 +434,6 @@ module.exports = {
                         let precoTotal = valores.produtos[i].precoTotal * 1;
                         let precoUnitario =
                             valores.produtos[i].precoUnitario * 1;
-                        if (
-                            !codigoBarras ||
-                            !quantidadeVendida ||
-                            !precoTotal ||
-                            !precoUnitario
-                        ) {
-                            console.log(
-                                "Um dos campos do produto " + i + " é nulo"
-                            );
-                            break;
-                        }
                         await OrdemServicoService.inserirProdutoHasOSDetalhes(
                             codigoBarras,
                             idOSDetalhes,
@@ -376,20 +441,11 @@ module.exports = {
                             precoTotal,
                             precoUnitario
                         ).catch((error) => {
-                            throw new AppError(
-                                `Erro ao inserir produto da posição ${i}. ` +
-                                    error,
-                                500
-                            );
-                        });
-                        await ProdutoService.alterarEstoque(
-                            codigoBarras,
-                            quantidadeVendida * -1
-                        ).catch((error) => {
-                            throw new AppError(
-                                `Erro ao alterar estoque do produto ${i}. ` +
-                                    error,
-                                500
+                            console.log(
+                                "O produto na posição " +
+                                    i +
+                                    " não foi inserido." +
+                                    error
                             );
                         });
                     }
@@ -399,22 +455,17 @@ module.exports = {
                         let idServico = valores.servicos[i].idServico;
                         let idFuncionario = valores.servicos[i].idFuncionario;
                         let observacao = valores.servicos[i].observacao;
-                        if (!idServico || !idFuncionario) {
-                            console.log(
-                                "Um dos campos do produto " + i + " é nulo"
-                            );
-                            // break;
-                        }
                         await OrdemServicoService.inserirExecutaFuncao(
                             idServico,
                             idFuncionario,
                             observacao,
                             idOSDetalhes
                         ).catch((error) => {
-                            throw new AppError(
-                                `Erro ao inserir o serviço da posição ${i}. ` +
-                                    error,
-                                500
+                            console.log(
+                                "O serviço não foi inserido na posição " +
+                                    i +
+                                    " não foi inserido." +
+                                    error
                             );
                         });
                     }
@@ -467,6 +518,7 @@ module.exports = {
                         produtosCadastrados.push({
                             codigoBarras: vendas[i].codigoBarras,
                             quantidadeVendida: vendas[i].quantidadeVendida,
+                            precoUnitario: vendas[i].precoUnitario,
                             precoTotal: vendas[i].precoTotal,
                         });
                     }
