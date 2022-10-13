@@ -371,7 +371,7 @@ module.exports = {
                 let idFuncionario = valores.servicos[i].idFuncionario;
                 if (!idServico || !idFuncionario) {
                     throw new AppError(
-                        "Um dos campos em produtos na posição " +
+                        "Um dos campos em serviços na posição " +
                             i +
                             " é nulo.",
                         400
