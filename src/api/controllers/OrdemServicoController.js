@@ -646,7 +646,6 @@ module.exports = {
                                 produtos[i].precoTotal,
                                 produtos[i].precoUnitario
                             );
-                            break;
                         }
                         if (
                             venda.quantidadeVendida !==
@@ -716,7 +715,6 @@ module.exports = {
                                 servicos[i].observacao,
                                 osDetalhes.idOSDetalhes
                             );
-                            break;
                         }
                         if (execucao.observacao != servicos[i].observacao) {
                             await OrdemServicoService.alterarExecutaFuncao(
