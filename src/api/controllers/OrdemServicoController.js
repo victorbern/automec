@@ -327,7 +327,6 @@ module.exports = {
         let km = valores.km;
 
         // Verificar se todos os valores de produtos estão certos
-        console.log(valores);
         if (valores.produtos) {
             for (let i in valores.produtos) {
                 let codigoBarras = valores.produtos[i].codigoBarras;
@@ -492,6 +491,94 @@ module.exports = {
         let km = valores.km;
         let produtos = valores.produtos;
         let servicos = valores.servicos;
+        // Verificar se todos os valores de produtos estão certos
+        if (produtos) {
+            for (let i in produtos) {
+                let codigoBarras = produtos[i].codigoBarras;
+                let quantidadeVendida = produtos[i].quantidadeVendida * 1;
+                let precoTotal = produtos[i].precoTotal * 1;
+                let precoUnitario = produtos[i].precoUnitario * 1;
+
+                if (
+                    !codigoBarras ||
+                    !quantidadeVendida ||
+                    !precoTotal ||
+                    !precoUnitario
+                ) {
+                    console.log(codigoBarras);
+                    console.log(quantidadeVendida);
+                    console.log(precoTotal);
+                    console.log(precoUnitario);
+                    throw new AppError(
+                        "Um dos campos em produtos na posição " +
+                            i +
+                            " é nulo.",
+                        400
+                    );
+                }
+
+                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+                    codigoBarras
+                );
+
+                if (!produto) {
+                    throw new AppError(
+                        "O código de barras para o produto especificado não existe!",
+                        400
+                    );
+                }
+            }
+        }
+
+        // Verificar se todos os valores de produtos estão certos
+
+        if (servicos) {
+            for (let i in servicos) {
+                let idServico = servicos[i].idServico;
+                let idFuncionario = servicos[i].idFuncionario;
+                if (!idServico || !idFuncionario) {
+                    throw new AppError(
+                        "Um dos campos em serviços na posição " +
+                            i +
+                            " é nulo.",
+                        400
+                    );
+                }
+
+                let servico = await ServicoService.buscarPorId(idServico);
+
+                let funcionario = await FuncionarioService.buscarPorId(
+                    idFuncionario
+                );
+
+                if (!servico) {
+                    throw new AppError(
+                        "O id para o serviço especificado não existe!",
+                        400
+                    );
+                }
+
+                if (!funcionario) {
+                    throw new AppError(
+                        "O id para o funcionário especificado não existe!",
+                        400
+                    );
+                }
+            }
+        }
+
+        if (!idOrdemServico) {
+            throw new AppError(
+                "O campo idOrdemServico não pode ser nulo!",
+                400
+            );
+        }
+        if (!idCliente) {
+            throw new AppError("O campo idCliente não pode ser nulo!", 400);
+        }
+        if (!placaVeiculo) {
+            throw new AppError("O campo placaVeiculo não pode ser nulo!", 400);
+        }
 
         if (idOrdemServico && idCliente && placaVeiculo) {
             await OrdemServicoService.alterarOrdemServico(
@@ -554,7 +641,8 @@ module.exports = {
                                     produtos[i].codigoBarras,
                                     osDetalhes.idOSDetalhes,
                                     produtos[i].quantidadeVendida,
-                                    produtos[i].precoTotal
+                                    produtos[i].precoTotal,
+                                    produtos[i].precoUnitario
                                 );
                                 break;
                             }
@@ -567,7 +655,8 @@ module.exports = {
                                     osDetalhes.idOSDetalhes,
                                     produtos[i].codigoBarras,
                                     produtos[i].quantidadeVendida,
-                                    produtos[i].precoTotal
+                                    produtos[i].precoTotal,
+                                    produtos[i].precoUnitario
                                 );
                             }
                         }
@@ -637,7 +726,13 @@ module.exports = {
                         }
                     }
                 }
+            } else {
+                throw new AppError(
+                    "Não foram encontradas OSDetalhes para esta Ordem de Serviço",
+                    400
+                );
             }
+
             json.result = "Dados enviados";
         } else {
             throw new AppError("Campos não enviados", 400);

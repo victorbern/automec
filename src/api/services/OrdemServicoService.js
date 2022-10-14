@@ -246,7 +246,7 @@ module.exports = {
     buscarVendaPorOSDetalhes: (idOSDetalhes) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT codigoBarras, quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?",
+                "SELECT codigoBarras, quantidadeVendida, precoTotal, precoUnitario FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ?",
                 [idOSDetalhes],
                 (error, results) => {
                     if (error) {
@@ -266,7 +266,7 @@ module.exports = {
     buscarProdutoOSDetalhes: (idOSDetalhes, codigoBarras) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "SELECT quantidadeVendida, precoTotal FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && codigoBarras = ?",
+                "SELECT quantidadeVendida, precoTotal, precoUnitario FROM Produto_has_OSDetalhes WHERE idOSDetalhes = ? && codigoBarras = ?",
                 [idOSDetalhes, codigoBarras],
                 (error, results) => {
                     if (error) {
@@ -285,15 +285,22 @@ module.exports = {
 
     alterarProdutoOSDetalhes: (
         idOSDetalhes,
-        idProduto,
+        codigoBarras,
         quantidadeVendida,
-        precoTotal
+        precoTotal,
+        precoUnitario
     ) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                "UPDATE Produto_has_OSDetalhes SET quantidadeVendida = ?, precoTotal = ? " +
-                    "WHERE idOSDetalhes = ? && idProduto = ?",
-                [quantidadeVendida, precoTotal, idOSDetalhes, idProduto],
+                "UPDATE Produto_has_OSDetalhes SET quantidadeVendida = ?, precoTotal = ?, precoUnitario = ? " +
+                    "WHERE idOSDetalhes = ? && codigoBarras = ?",
+                [
+                    quantidadeVendida,
+                    precoTotal,
+                    precoUnitario,
+                    idOSDetalhes,
+                    codigoBarras,
+                ],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
