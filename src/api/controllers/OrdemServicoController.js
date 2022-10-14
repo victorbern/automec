@@ -162,7 +162,7 @@ module.exports = {
                     descricao: produto.descricao,
                     quantidadeVendida: vendas[i].quantidadeVendida,
                     precoUnitario: vendas[i].precoUnitario,
-                    precoTotal: produto.precoTotal,
+                    precoTotal: vendas[i].precoTotal,
                 });
             }
         }
@@ -327,7 +327,7 @@ module.exports = {
         let km = valores.km;
 
         // Verificar se todos os valores de produtos estão certos
-
+        console.log(valores);
         if (valores.produtos) {
             for (let i in valores.produtos) {
                 let codigoBarras = valores.produtos[i].codigoBarras;
@@ -565,7 +565,7 @@ module.exports = {
                             ) {
                                 await OrdemServicoService.alterarProdutoOSDetalhes(
                                     osDetalhes.idOSDetalhes,
-                                    produtos[i].idProduto,
+                                    produtos[i].codigoBarras,
                                     produtos[i].quantidadeVendida,
                                     produtos[i].precoTotal
                                 );
@@ -663,7 +663,7 @@ module.exports = {
                     for (let i in vendas) {
                         await OrdemServicoService.excluirProdutoOSDetalhes(
                             osDetalhes.idOSDetalhes,
-                            vendas[i].idProduto
+                            vendas[i].codigoBarras
                         );
                     }
                 }

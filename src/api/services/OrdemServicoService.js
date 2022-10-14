@@ -163,7 +163,7 @@ module.exports = {
         });
     },
 
-    inserirOSDetalhes: (idOrdemServico, conexao) => {
+    inserirOSDetalhes: (idOrdemServico) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
                 `INSERT INTO OSDetalhes (idOrdemServico, dataOS) VALUES (?, CURDATE())`,
