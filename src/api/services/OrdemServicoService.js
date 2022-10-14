@@ -274,7 +274,7 @@ module.exports = {
                         return;
                     }
                     if (results.length > 0) {
-                        aceito(results);
+                        aceito(results[0]);
                     } else {
                         aceito(false);
                     }
