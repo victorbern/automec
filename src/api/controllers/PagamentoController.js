@@ -176,7 +176,7 @@ module.exports = {
         let desconto = valores.desconto;
 
         let ordensServico = valores.ordensServico;
-        let vendasDiretas = valores.vendasDiretas;
+        let vendaDireta = valores.vendaDireta;
         for (let i in ordensServico) {
             if (
                 !(await OrdemServicoService.isPaga(
@@ -196,9 +196,7 @@ module.exports = {
                 formaPagamento,
                 desconto
             ).catch((error) => {
-                json.error = error;
-                res.json(json);
-                return;
+                throw new AppError(error, 500);
             });
             if (ordensServico) {
                 for (let i in ordensServico) {
@@ -210,26 +208,31 @@ module.exports = {
                     await PagamentoService.inserirDetalhePagamento(
                         ordensServico[i].idOrdemServico,
                         IdPagamento
-                    );
+                    ).catch((error) => {
+                        throw new AppError(error, 500);
+                    });
                 }
             }
-            if (vendasDiretas) {
-                for (let i in vendasDiretas) {
-                    let IdVendaDireta =
-                        await VendaDiretaService.inserirVendaDireta(
-                            IdPagamento,
-                            total
+            if (vendaDireta) {
+                let IdVendaDireta = await VendaDiretaService.inserirVendaDireta(
+                    IdPagamento,
+                    vendaDireta.total
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
+                let produtos = vendaDireta.produtos;
+                if (produtos) {
+                    for (let i in produtos) {
+                        await VendaDiretaService.inserirProduto_has_VendaDireta(
+                            IdVendaDireta,
+                            produtos[i].codigoBarras,
+                            produtos[i].quantidadeVendida,
+                            produtos[i].precoTotal,
+                            produtos[i].precoUnitario
                         ).catch((error) => {
-                            json.error = error;
+                            throw new AppError(error, 500);
                         });
-                    await VendaDiretaService.inserirProduto_has_VendaDireta(
-                        IdVendaDireta,
-                        vendasDiretas[i].idProduto,
-                        vendasDiretas[i].quantidadeVendida,
-                        vendasDiretas[i].precoTotal
-                    ).catch((error) => {
-                        json.error = error;
-                    });
+                    }
                 }
             }
             json.result = "Campos enviados";
