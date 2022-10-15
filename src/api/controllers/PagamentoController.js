@@ -6,6 +6,7 @@ const VeiculoService = require("../services/VeiculoService");
 const VendaDiretaService = require("../services/VendaDiretaService");
 const qs = require("qs");
 const AppError = require("../errors/AppError");
+const ProdutoService = require("../services/ProdutoService");
 
 module.exports = {
     buscarTodos: async (req, res) => {
@@ -37,7 +38,7 @@ module.exports = {
                 formaPagamento: pagamentos[i].formaPagamento,
                 desconto: pagamentos[i].desconto,
                 dataHora: pagamentos[i].dataHora,
-                vendasDiretas: null,
+                vendaDireta: null,
                 ordensServico: [],
             };
 
@@ -82,10 +83,32 @@ module.exports = {
                 }
             }
             // Busca todas as vendas diretas que possuam aquele pagamento associado
-            let vendasDiretas = await VendaDiretaService.buscarPorPagamento(
+            let vendaDireta = await VendaDiretaService.buscarPorPagamento(
                 pagamentos[i].idPagamento
             );
-            pagamento.vendasDiretas = vendasDiretas;
+            let vendas;
+
+            if (vendaDireta) {
+                vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
+                    vendaDireta.idVendaDireta
+                );
+            }
+            let jsonVendas = [];
+            for (let i in vendas) {
+                let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+                    vendas[i].codigoBarras
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
+                jsonVendas.push({
+                    codigoBarras: vendas[i].codigoBarras,
+                    descricao: produto.descricao,
+                    quantidadeVendida: vendas[i].quantidadeVendida,
+                    precoTotal: vendas[i].precoTotal,
+                    precoUnitario: vendas[i].precoUnitario,
+                });
+            }
+            pagamento.vendaDireta = jsonVendas;
 
             // Adiciona o pagamento recem salvo em 'pagamento' no json.result
             json.result.push(pagamento);
@@ -154,13 +177,33 @@ module.exports = {
                     };
                 }
             }
-            // Busca todas as vendas diretas que possuam aquele pagamento associado
-            let vendasDiretas = await VendaDiretaService.buscarPorPagamento(
-                idPagamento
-            );
-
-            json.result.vendasDiretas = vendasDiretas;
         }
+        // Busca todas as vendas diretas que possuam aquele pagamento associado
+        let vendaDireta = await VendaDiretaService.buscarPorPagamento(
+            idPagamento
+        );
+        let vendas;
+        if (vendaDireta) {
+            vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
+                vendaDireta.idVendaDireta
+            );
+        }
+        let jsonVendas = [];
+        for (let i in vendas) {
+            let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+                vendas[i].codigoBarras
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            jsonVendas.push({
+                codigoBarras: vendas[i].codigoBarras,
+                descricao: produto.descricao,
+                quantidadeVendida: vendas[i].quantidadeVendida,
+                precoTotal: vendas[i].precoTotal,
+                precoUnitario: vendas[i].precoUnitario,
+            });
+        }
+        json.result.vendasDiretas = jsonVendas;
         res.json(json);
     },
 
@@ -201,7 +244,8 @@ module.exports = {
             if (ordensServico) {
                 for (let i in ordensServico) {
                     await OrdemServicoService.alterarStatus(
-                        ordensServico[i].idOrdemServico
+                        ordensServico[i].idOrdemServico,
+                        true
                     ).catch((error) => {
                         throw new AppError(error, 500);
                     });
@@ -243,30 +287,51 @@ module.exports = {
         res.json(json);
     },
 
-    alterarPagamento: async (req, res) => {
+    // alterarPagamento: async (req, res) => {
+    //     let json = { error: "", result: {} };
+
+    //     let valores = req.body;
+    //     valores = qs.parse(valores);
+
+    //     let idPagamento = req.params.id;
+    //     let subtotal = valores.subtotal;
+    //     let total = valores.total;
+    //     let formaPagamento = valores.formaPagamento;
+    //     let desconto = valores.desconto;
+    //     let ordensServico = valores.ordensServico;
+    //     let vendasDiretas = valores.vendasDiretas;
+
+    //     if (subtotal && total && formaPagamento) {
+    //         await PagamentoService.alterarPagamento(
+    //             idPagamento,
+    //             subtotal,
+    //             total,
+    //             desconto,
+    //             formaPagamento
+    //         ).catch((error) => {
+    //             throw new AppError(error, 500);
+    //         });
+    //         let detalhePagamento =
+    //             await PagamentoService.buscarDetalhePagamento(
+    //                 idPagamento
+    //             ).catch((error) => {
+    //                 throw new AppError(error, 500);
+    //             });
+    //         for (let i in detalhePagamento) {
+    //         }
+    //     } else {
+    //         throw new AppError("Campos não enviados", 400);
+    //     }
+
+    //     res.json(json);
+    // },
+
+    excluirPagamento: async (req, res) => {
         let json = { error: "", result: {} };
 
-        let valores = req.body;
-        valores = qs.parse(valores);
-
         let idPagamento = req.params.id;
-        let subtotal = valores.subtotal;
-        let total = valores.total;
-        let formaPagamento = valores.formaPagamento;
-        let desconto = valores.desconto;
-        let ordensServico = valores.ordensServico;
-        let vendasDiretas = valores.vendasDiretas;
 
-        if (subtotal && total && formaPagamento) {
-            await PagamentoService.alterarPagamento(
-                idPagamento,
-                subtotal,
-                total,
-                desconto,
-                formaPagamento
-            ).catch((error) => {
-                throw new AppError(error, 500);
-            });
+        if (idPagamento) {
             let detalhePagamento =
                 await PagamentoService.buscarDetalhePagamento(
                     idPagamento
@@ -274,26 +339,42 @@ module.exports = {
                     throw new AppError(error, 500);
                 });
             for (let i in detalhePagamento) {
+                await OrdemServicoService.alterarStatus(
+                    detalhePagamento[i].idOrdemServico,
+                    false
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
+                await PagamentoService.excluirDetalhePagamento(
+                    idPagamento,
+                    detalhePagamento[i].idOrdemServico
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
             }
-        } else {
-            throw new AppError("Campos não enviados", 400);
-        }
+            let vendasDiretas = await VendaDiretaService.buscarPorPagamento(
+                idPagamento
+            );
 
-        res.json(json);
-    },
-
-    excluirCliente: async (req, res) => {
-        let json = { error: "", result: {} };
-
-        let id = req.params.id;
-
-        if (id) {
-            await ClienteService.excluirCliente(id).catch((error) => {
-                throw new AppError(error, 500);
-            });
-            json.result = {
-                id,
-            };
+            for (let i in vendasDiretas) {
+                await VendaDiretaService.excluirProdutoVendaDireta(
+                    vendasDiretas[i].idVendaDireta,
+                    vendasDiretas[i].codigoBarras
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
+                await VendaDiretaService.excluirVendaDireta(
+                    vendasDiretas[i].idVendaDireta
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
+            }
+            await PagamentoService.excluirPagamento(idPagamento).catch(
+                (error) => {
+                    throw new AppError(error, 500);
+                }
+            );
+            json.result = "Pagamento excluido com sucesso!";
         } else {
             throw new AppError("Campos não enviados", 400);
         }

@@ -39,14 +39,14 @@ module.exports = {
     buscarPorPagamento: (idPagamento) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `SELECT idVendaDireta, total, dataHora  FROM VendaDireta WHERE idPagamento = ?`,
+                `SELECT idVendaDireta, total, dataHora FROM VendaDireta WHERE idPagamento = ?`,
                 [idPagamento],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
                         return;
                     }
-                    aceito(results);
+                    aceito(results[0]);
                 }
             );
         });

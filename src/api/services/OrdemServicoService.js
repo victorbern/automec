@@ -115,11 +115,11 @@ module.exports = {
         });
     },
 
-    alterarStatus: (idOrdemServico) => {
+    alterarStatus: (idOrdemServico, isPaga) => {
         return new Promise((aceito, rejeitado) => {
             db.executeSQLQueryParams(
-                `UPDATE OrdemServico SET isFinalizada = true, isPaga = true WHERE idOrdemServico = ?`,
-                [idOrdemServico],
+                `UPDATE OrdemServico SET isPaga = ? WHERE idOrdemServico = ?`,
+                [isPaga, idOrdemServico],
                 (error, results) => {
                     if (error) {
                         rejeitado(error);
