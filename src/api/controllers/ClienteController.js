@@ -188,9 +188,7 @@ module.exports = {
             await ClienteService.excluirCliente(id).catch((error) => {
                 throw new AppError(error, 500);
             });
-            json.result = {
-                id,
-            };
+            json.result = "Cliente deletado com sucesso!";
         } else {
             throw new AppError("Campos não enviados", 400);
         }
