@@ -13,7 +13,7 @@ module.exports = {
             json.result.push({
                 codigoBarras: produtos[i].codigoBarras,
                 descricao: produtos[i].descricao,
-                valorCurto: produtos[i].valorCusto,
+                valorCusto: produtos[i].valorCusto,
                 quantidadeEstoque: produtos[i].quantidadeEstoque,
                 precoVenda: produtos[i].precoVenda,
             });
