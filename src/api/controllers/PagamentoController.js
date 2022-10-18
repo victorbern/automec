@@ -143,7 +143,7 @@ module.exports = {
             formaPagamento: pagamento.formaPagamento,
             desconto: pagamento.desconto,
             dataHora: pagamento.dataHora,
-            vendasDiretas: null,
+            vendaDireta: null,
             ordensServico: [],
         };
 
@@ -203,7 +203,7 @@ module.exports = {
                 precoUnitario: vendas[i].precoUnitario,
             });
         }
-        json.result.vendasDiretas = jsonVendas;
+        json.result.vendaDireta = jsonVendas;
         res.json(json);
     },
 
