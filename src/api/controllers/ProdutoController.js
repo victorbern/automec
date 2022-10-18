@@ -70,6 +70,9 @@ module.exports = {
         let precoVenda = req.body.precoVenda;
 
         if (codigoBarras && descricao && precoVenda) {
+            if (!quantidadeEstoque) {
+                quantidadeEstoque = 0;
+            }
             await ProdutoService.inserirProduto(
                 codigoBarras,
                 descricao,
@@ -98,12 +101,16 @@ module.exports = {
 
         let codigoBarras = req.params.codigoBarras;
         let valorAlteracao = req.body.valorAlteracao;
-
-        await ProdutoService.alterarEstoque(codigoBarras, valorAlteracao).catch(
-            (error) => {
+        if (valorAlteracao) {
+            await ProdutoService.alterarEstoque(
+                codigoBarras,
+                valorAlteracao
+            ).catch((error) => {
                 throw new AppError(error, 500);
-            }
-        );
+            });
+        } else {
+            throw new AppError("O valor não pode ser nulo", 400);
+        }
         json.result = "Estoque alterado com sucesso!";
         res.json(json);
     },

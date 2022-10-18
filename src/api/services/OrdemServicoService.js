@@ -283,6 +283,22 @@ module.exports = {
         });
     },
 
+    // buscarVendasOrdemServico: (idOrdemServico) => {
+    //     return new Promise((aceito, rejeitado) => {
+    //         db.executeSQLQueryParams(
+    //             `SELECT p_od.idOSDetalhes, p_od.codigoBarras, p_od.quantidadeVendida, p_od.precoUnitario, p_od.precoTotal FROM Produto_has_OSDetalhes AS p_od INNER JOIN OSDetalhes AS od ON p_od.idOSDetalhes = od.isOSDetalhes WHERE od.idOrdemServico = ?`,
+    //             [idOrdemServico],
+    //             (error, results) => {
+    //                 if (error) {
+    //                     rejeitado(error);
+    //                     return;
+    //                 }
+    //                 aceito(results);
+    //             }
+    //         );
+    //     });
+    // },
+
     alterarProdutoOSDetalhes: (
         idOSDetalhes,
         codigoBarras,

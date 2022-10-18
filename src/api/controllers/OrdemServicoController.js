@@ -314,6 +314,62 @@ module.exports = {
         res.json(json);
     },
 
+    fecharOrdemServicoPaga: async (idOrdemServico) => {
+        await OrdemServicoService.alterarStatus(idOrdemServico, true).catch(
+            (error) => {
+                throw new AppError(error, 500);
+            }
+        );
+        // Alterar estoque dos produtos vendidos pela OS
+        let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
+            idOrdemServico
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
+        let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
+            osDetalhes.idOSDetalhes
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
+        for (let j in vendas) {
+            await ProdutoService.alterarEstoque(
+                vendas[j].codigoBarras,
+                vendas[j].quantidadeVendida * -1
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+        }
+        // Fim da alteração no estoque dos produtos vendidos
+    },
+
+    abrirOrdemServicoPaga: async (idOrdemServico) => {
+        await OrdemServicoService.alterarStatus(idOrdemServico, false).catch(
+            (error) => {
+                throw new AppError(error, 500);
+            }
+        );
+        // Alterar estoque dos produtos vendidos pela OS
+        let osDetalhes = await OrdemServicoService.buscarOSDetalhes(
+            idOrdemServico
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
+        let vendas = await OrdemServicoService.buscarVendaPorOSDetalhes(
+            osDetalhes.idOSDetalhes
+        ).catch((error) => {
+            throw new AppError(error, 500);
+        });
+        for (let j in vendas) {
+            await ProdutoService.alterarEstoque(
+                vendas[j].codigoBarras,
+                vendas[j].quantidadeVendida
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+        }
+        // Fim da alteração no estoque dos produtos vendidos
+    },
+
     inserirOrdemServico: async (req, res) => {
         // Cria o json que será devolvido no response
         let json = { error: "", result: "" };

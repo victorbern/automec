@@ -7,6 +7,7 @@ const VendaDiretaService = require("../services/VendaDiretaService");
 const qs = require("qs");
 const AppError = require("../errors/AppError");
 const ProdutoService = require("../services/ProdutoService");
+const OrdemServicoController = require("./OrdemServicoController");
 
 module.exports = {
     buscarTodos: async (req, res) => {
@@ -243,12 +244,9 @@ module.exports = {
             });
             if (ordensServico) {
                 for (let i in ordensServico) {
-                    await OrdemServicoService.alterarStatus(
-                        ordensServico[i].idOrdemServico,
-                        true
-                    ).catch((error) => {
-                        throw new AppError(error, 500);
-                    });
+                    await OrdemServicoController.fecharOrdemServicoPaga(
+                        ordensServico[i].idOrdemServico
+                    );
                     await PagamentoService.inserirDetalhePagamento(
                         ordensServico[i].idOrdemServico,
                         IdPagamento
@@ -339,12 +337,9 @@ module.exports = {
                     throw new AppError(error, 500);
                 });
             for (let i in detalhePagamento) {
-                await OrdemServicoService.alterarStatus(
-                    detalhePagamento[i].idOrdemServico,
-                    false
-                ).catch((error) => {
-                    throw new AppError(error, 500);
-                });
+                await OrdemServicoController.abrirOrdemServicoPaga(
+                    detalhePagamento[i].idOrdemServico
+                );
                 await PagamentoService.excluirDetalhePagamento(
                     idPagamento,
                     detalhePagamento[i].idOrdemServico
@@ -352,19 +347,28 @@ module.exports = {
                     throw new AppError(error, 500);
                 });
             }
-            let vendasDiretas = await VendaDiretaService.buscarPorPagamento(
+            let vendaDireta = await VendaDiretaService.buscarPorPagamento(
                 idPagamento
             );
 
-            for (let i in vendasDiretas) {
-                await VendaDiretaService.excluirProdutoVendaDireta(
-                    vendasDiretas[i].idVendaDireta,
-                    vendasDiretas[i].codigoBarras
-                ).catch((error) => {
-                    throw new AppError(error, 500);
-                });
+            if (vendaDireta) {
+                // Percorre todas as vendas de venda direta para excluir Produto_has_VendaDireta uma por uma
+                let vendas =
+                    await VendaDiretaService.buscarVendasPorVendaDireta(
+                        vendaDireta.idVendaDireta
+                    ).catch((error) => {
+                        throw new AppError(error, 500);
+                    });
+                for (let i in vendas) {
+                    await VendaDiretaService.excluirProdutoVendaDireta(
+                        vendaDireta.idVendaDireta,
+                        vendas[i].codigoBarras
+                    ).catch((error) => {
+                        throw new AppError(error, 500);
+                    });
+                }
                 await VendaDiretaService.excluirVendaDireta(
-                    vendasDiretas[i].idVendaDireta
+                    vendaDireta.idVendaDireta
                 ).catch((error) => {
                     throw new AppError(error, 500);
                 });
