@@ -38,7 +38,7 @@ module.exports = {
                 formaPagamento: pagamentos[i].formaPagamento,
                 desconto: pagamentos[i].desconto,
                 dataHora: pagamentos[i].dataHora,
-                vendaDireta: null,
+                vendaDireta: [],
                 ordensServico: [],
             };
 
@@ -143,7 +143,7 @@ module.exports = {
             formaPagamento: pagamento.formaPagamento,
             desconto: pagamento.desconto,
             dataHora: pagamento.dataHora,
-            vendaDireta: null,
+            vendaDireta: [],
             ordensServico: [],
         };
 
