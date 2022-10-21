@@ -80,5 +80,5 @@ router.post("/pagamento", PagamentoController.inserirPagamento); // Inserir novo
 router.delete("/pagamento/:id", PagamentoController.excluirPagamento); // Deletar um cliente do banco de dados
 // router.get("/clientes/:valor", ClienteController.buscaPorValor); // Buscar cliente por nome e/ou cpfCnpj
 
-router.get("/relatorio/pagamentos", RelatorioController.buscarPagamentos);
+router.post("/relatorio/pagamentos", RelatorioController.buscarPagamentos);
 module.exports = router;

@@ -6,10 +6,11 @@ var sd = require("silly-datetime");
 module.exports = {
     buscarPagamentos: async (req, res) => {
         let json = { error: "", result: { total: null, tipos: [] } };
-
         let dataDe = req.body.dataDe;
         let dataAte = req.body.dataAte;
-
+        console.log(dataDe)
+        // dataDe = "2022-10-18T03:00:00.000Z";
+        // dataAte = "2022-10-31T03:00:00.000Z";
         if (!dataDe) {
             throw new AppError("O campo data inicio não pode ser nulo", 400);
         }
