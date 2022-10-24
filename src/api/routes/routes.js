@@ -81,4 +81,6 @@ router.delete("/pagamento/:id", PagamentoController.excluirPagamento); // Deleta
 // router.get("/clientes/:valor", ClienteController.buscaPorValor); // Buscar cliente por nome e/ou cpfCnpj
 
 router.post("/relatorio/pagamentos", RelatorioController.buscarPagamentos);
+router.post("/relatorio/ordens-servico", RelatorioController.buscarOrdens);
+router.post("/relatorio/produtos", RelatorioController.buscarProdutos);
 module.exports = router;
