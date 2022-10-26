@@ -277,7 +277,7 @@ module.exports = {
                     }
                 }
             }
-            json.result = "Campos enviados";
+            json.result = { idPagamento: IdPagamento };
         } else {
             throw new AppError("Campos não enviados", 400);
         }
