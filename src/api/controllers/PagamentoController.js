@@ -208,6 +208,96 @@ module.exports = {
         res.json(json);
     },
 
+    buscaPorValor: async (req, res) => {
+        let json = { error: "", result: {} };
+        let valor = req.params.valor;
+
+        let pagamento = null;
+        if (!valor) {
+            pagamento = await PagamentoService.buscarTodos().catch((error) => {
+                throw new AppError(error, 500);
+            });
+        } else {
+            pagamento = await PagamentoService.buscarPorId(valor).catch(
+                (error) => {
+                    throw new AppError(error, 500);
+                }
+            );
+        }
+
+        if (!pagamento) {
+            res.json(json);
+            return;
+        }
+        json.result = {
+            idPagamento: pagamento.idPagamento,
+            subtotal: pagamento.subtotal,
+            total: pagamento.total,
+            formaPagamento: pagamento.formaPagamento,
+            desconto: pagamento.desconto,
+            dataHora: pagamento.dataHora,
+            vendaDireta: [],
+            ordensServico: [],
+        };
+
+        let detalhePagamento = await PagamentoService.buscarDetalhePagamento(
+            valor
+        ).catch((error) => {
+            json.error = error;
+        });
+        if (detalhePagamento) {
+            for (let i in detalhePagamento) {
+                let ordemServico = await OrdemServicoService.buscarPorId(
+                    detalhePagamento[i].idOrdemServico
+                ).catch((error) => {
+                    throw new AppError(error, 500);
+                });
+                if (ordemServico) {
+                    let cliente = await ClienteService.buscarPorId(
+                        ordemServico.idCliente
+                    );
+                    let veiculo = await VeiculoService.buscaEspecificaPlaca(
+                        ordemServico.placaVeiculo
+                    );
+                    // Estou exibindo todos os dados de cliente e de veículo, porque caso um deles seja nulo,
+                    //  eu exibir apenas um atributo (como cliente.nomeCliente) vai quebrar o backend
+                    json.result.ordensServico = {
+                        idOrdemServico: ordemServico.idOrdemServico,
+                        total: ordemServico.total,
+                        km: ordemServico.km,
+                        cliente: cliente,
+                        veiculo: veiculo,
+                    };
+                }
+            }
+        }
+        // Busca todas as vendas diretas que possuam aquele pagamento associado
+        let vendaDireta = await VendaDiretaService.buscarPorPagamento(valor);
+        let vendas;
+        if (vendaDireta) {
+            vendas = await VendaDiretaService.buscarVendasPorVendaDireta(
+                vendaDireta.idVendaDireta
+            );
+        }
+        let jsonVendas = [];
+        for (let i in vendas) {
+            let produto = await ProdutoService.buscaEspecificaCodigoBarras(
+                vendas[i].codigoBarras
+            ).catch((error) => {
+                throw new AppError(error, 500);
+            });
+            jsonVendas.push({
+                codigoBarras: vendas[i].codigoBarras,
+                descricao: produto.descricao,
+                quantidadeVendida: vendas[i].quantidadeVendida,
+                precoTotal: vendas[i].precoTotal,
+                precoUnitario: vendas[i].precoUnitario,
+            });
+        }
+        json.result.vendaDireta = jsonVendas;
+        res.json(json);
+    },
+
     inserirPagamento: async (req, res) => {
         let json = { error: "", result: {} };
 
