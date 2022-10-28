@@ -63,6 +63,12 @@ module.exports = {
                         throw new AppError(error, 500);
                     });
                     if (ordemServico) {
+                        let detalheOS =
+                            await OrdemServicoService.buscarOSDetalhes(
+                                ordemServico.idOrdemServico
+                            ).catch((error) => {
+                                throw new AppError(error, 500);
+                            });
                         // Buscamos no banco de dados os valores referentes ao cliente desta ordem de serviço especificada
                         let cliente = await ClienteService.buscarPorId(
                             ordemServico.idCliente
@@ -76,6 +82,7 @@ module.exports = {
                         pagamento.ordensServico.push({
                             idOrdemServico: ordemServico.idOrdemServico,
                             total: ordemServico.total,
+                            dataOS: detalheOS.dataOS,
                             km: ordemServico.km,
                             cliente: cliente,
                             veiculo: veiculo,
@@ -161,6 +168,11 @@ module.exports = {
                     throw new AppError(error, 500);
                 });
                 if (ordemServico) {
+                    let detalheOS = await OrdemServicoService.buscarOSDetalhes(
+                        ordemServico.idOrdemServico
+                    ).catch((error) => {
+                        throw new AppError(error, 500);
+                    });
                     let cliente = await ClienteService.buscarPorId(
                         ordemServico.idCliente
                     );
@@ -169,13 +181,14 @@ module.exports = {
                     );
                     // Estou exibindo todos os dados de cliente e de veículo, porque caso um deles seja nulo,
                     //  eu exibir apenas um atributo (como cliente.nomeCliente) vai quebrar o backend
-                    json.result.ordensServico = {
+                    json.result.ordensServico.push({
                         idOrdemServico: ordemServico.idOrdemServico,
                         total: ordemServico.total,
+                        dataOS: detalheOS.dataOS,
                         km: ordemServico.km,
                         cliente: cliente,
                         veiculo: veiculo,
-                    };
+                    });
                 }
             }
         }
@@ -258,6 +271,12 @@ module.exports = {
                         throw new AppError(error, 500);
                     });
                     if (ordemServico) {
+                        let detalheOS =
+                            await OrdemServicoService.buscarOSDetalhes(
+                                ordemServico.idOrdemServico
+                            ).catch((error) => {
+                                throw new AppError(error, 500);
+                            });
                         // Buscamos no banco de dados os valores referentes ao cliente desta ordem de serviço especificada
                         let cliente = await ClienteService.buscarPorId(
                             ordemServico.idCliente
@@ -271,6 +290,7 @@ module.exports = {
                         pagamento.ordensServico.push({
                             idOrdemServico: ordemServico.idOrdemServico,
                             total: ordemServico.total,
+                            dataOS: detalheOS.dataOS,
                             km: ordemServico.km,
                             cliente: cliente,
                             veiculo: veiculo,
